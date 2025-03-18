@@ -1,4 +1,4 @@
-import Link from "next/link";
+// import Link from "next/link";
 import incidents from "../data/incidents";
 
 export default function Home() {
@@ -11,7 +11,6 @@ export default function Home() {
             <button onClick={() => window.location.href = `/${incident.id}`}>
                 {incident.title}
             </button>
-            
           </li>
         ))}
       </ul>
