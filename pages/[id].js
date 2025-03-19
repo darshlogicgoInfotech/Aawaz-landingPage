@@ -137,35 +137,56 @@ export default function IncidentPage({ incident: initialIncident }) {
   return (
     <>
       <Head>
-        <title>{incident.title}</title>
-        <meta name="description" content={incident.description} />
+        <title>{incident?.title || 'News Details'}</title>
+        <meta name="description" content={incident?.description} />
+        
+        {/* Essential Open Graph tags */}
+        <meta property="og:type" content="article" />
+        <meta property="og:url" content={`https://aawaz-landing-pagee.vercel.app/${router.query.id}`} />
+        <meta property="og:title" content={incident?.title} />
+        <meta property="og:description" content={incident?.description} />
+        <meta property="og:site_name" content="Aawaz News" />
 
-        <meta property="og:title" content={incident.title} />
-        <meta property="og:description" content={incident.description} />
-        {incident.media.some((item) => item.endsWith(".mp4")) ? (
+        {/* Handle media content */}
+        {incident?.media?.some(item => item.endsWith('.mp4')) ? (
           <>
-            <meta property="og:video" content={incident.media.find((item) => item.endsWith(".mp4"))} />
+            <meta property="og:video" content={incident.media.find(item => item.endsWith('.mp4'))} />
+            <meta property="og:video:url" content={incident.media.find(item => item.endsWith('.mp4'))} />
+            <meta property="og:video:secure_url" content={incident.media.find(item => item.endsWith('.mp4'))} />
             <meta property="og:video:type" content="video/mp4" />
             <meta property="og:video:width" content="1280" />
             <meta property="og:video:height" content="720" />
           </>
-        ) : (
-          <meta property="og:image" content={incident.media[0]} />
-        )}
-
-        <meta name="twitter:card" content={incident.media.some((item) => item.endsWith(".mp4")) ? "player" : "summary_large_image"} />
-        <meta name="twitter:title" content={incident.title} />
-        <meta name="twitter:description" content={incident.description} />
-        {incident.media.some((item) => item.endsWith(".mp4")) ? (
+        ) : incident?.media?.length > 0 ? (
           <>
-            <meta name="twitter:player" content={incident.media.find((item) => item.endsWith(".mp4"))} />
+            <meta property="og:image" content={incident.media[0]} />
+            <meta property="og:image:secure_url" content={incident.media[0]} />
+            <meta property="og:image:width" content="1200" />
+            <meta property="og:image:height" content="630" />
+            <meta property="og:image:alt" content={incident?.title} />
+          </>
+        ) : null}
+
+        {/* Twitter Card tags */}
+        <meta name="twitter:card" content={incident?.media?.some(item => item.endsWith('.mp4')) ? "player" : "summary_large_image"} />
+        <meta name="twitter:site" content="@AawazNews" />
+        <meta name="twitter:title" content={incident?.title} />
+        <meta name="twitter:description" content={incident?.description} />
+        
+        {incident?.media?.some(item => item.endsWith('.mp4')) ? (
+          <>
+            <meta name="twitter:player" content={incident.media.find(item => item.endsWith('.mp4'))} />
             <meta name="twitter:player:width" content="1280" />
             <meta name="twitter:player:height" content="720" />
+            <meta name="twitter:player:stream" content={incident.media.find(item => item.endsWith('.mp4'))} />
+            <meta name="twitter:player:stream:content_type" content="video/mp4" />
           </>
-        ) : (
-          <meta name="twitter:image" content={incident.media[0]} />
-        )}
-
+        ) : incident?.media?.length > 0 ? (
+          <>
+            <meta name="twitter:image" content={incident.media[0]} />
+            <meta name="twitter:image:alt" content={incident?.title} />
+          </>
+        ) : null}
 
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
         <style>
