@@ -27,8 +27,10 @@ export default function IncidentPage({ incident: initialIncident }) {
 
         let response;
         try {
-          response = await axios.get(`http://139.59.32.181:8002/api/v1/event-post/event/${router.query.id}`);
+          response = await axios.get(`https://awaazeye.com/api/v1/event-post/event/${router.query.id}`);
+          console.log(response);
         } catch (err) {
+          console.log(err);
           setError(true);
           setLoading(false);
           setIncident(null);
