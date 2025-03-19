@@ -25,24 +25,16 @@ export default function IncidentPage({ incident: initialIncident }) {
         setError(false);
         setIncident(null);
 
-        let response;
-        try {
-          response = await axios.get(`https://awaazeye.com/api/v1/event-post/event/${router.query.id}`);
-          console.log(response);
-        } catch (err) {
-          console.log(err);
+        // Get data from static incidents array
+        const staticIncident = incidents[0]; // Using first incident as example
+        
+        if (!staticIncident || !staticIncident.body) {
           setError(true);
           setLoading(false);
-          setIncident(null);
           return;
         }
 
-        if (!response?.data?.body) {
-          setError(true);
-          setLoading(false);
-          return;
-        }
-        const data = response.data.body;
+        const data = staticIncident.body;
 
         // Format the data to match our structure
         const formattedData = {
@@ -57,9 +49,14 @@ export default function IncidentPage({ incident: initialIncident }) {
           notified: data.notifiedUserCount,
           media: data.attachments.map(attachment => attachment.attachment)
         };
+
         setIncident(formattedData);
         setSelectedMedia(formattedData.media[0]);
         setError(false);
+      } catch (error) {
+        console.error('Error:', error);
+        setError(true);
+        setIncident(null);
       } finally {
         setLoading(false);
       }
@@ -134,6 +131,11 @@ export default function IncidentPage({ incident: initialIncident }) {
     arrows: false,
   };
 
+  console.log(">>>>>>>>>>>>>>>>>>>>>>>>",incident)
+  console.log("111111111111111",incident.media.find(item => item.endsWith('.mp4')))
+  console.log("222222222222222",incident?.media?.some(item => item.endsWith('.mp4')))
+
+
   return (
     <>
       <Head>
@@ -142,7 +144,7 @@ export default function IncidentPage({ incident: initialIncident }) {
         
         {/* Essential Open Graph tags */}
         <meta property="og:type" content="article" />
-        <meta property="og:url" content={`https://aawaz-landing-pagee.vercel.app/${router.query.id}`} />
+        <meta property="og:url" content={`https://news.awaazeye.com//${router.query.id}`} />
         <meta property="og:title" content={incident?.title} />
         <meta property="og:description" content={incident?.description} />
         <meta property="og:site_name" content="Aawaz News" />
