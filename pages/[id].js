@@ -7,16 +7,16 @@ import axios from "axios";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 
-export default function IncidentPage() {
+export default function IncidentPage({ initialData, error: serverError }) {
   const router = useRouter();
-  const [incident, setIncident] = useState(null);
-  const [selectedMedia, setSelectedMedia] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
+  const [incident, setIncident] = useState(initialData);
+  const [selectedMedia, setSelectedMedia] = useState(initialData?.media?.[0]);
+  const [loading, setLoading] = useState(!initialData);
+  const [error, setError] = useState(serverError);
 
   useEffect(() => {
     const fetchIncidentData = async () => {
-      if (!router.query.id) return;
+      if (!router.query.id || initialData) return;
 
       try {
         setLoading(true);
@@ -29,20 +29,7 @@ export default function IncidentPage() {
         }
 
         const data = response.data.body;
-        const formattedData = {
-          id: data._id,
-          title: data.title,
-          description: data.description,
-          date: new Date(data.eventTime).toLocaleDateString('en-US', {
-            day: 'numeric',
-            month: 'short'
-          }),
-          time: getTimeAgo(new Date(data.eventTime)),
-          notified: data.notifiedUserCount,
-          media: data.attachments.map(item => item.attachment),
-          thumbnails: data.attachments.map(item => item.thumbnail),
-          mediaTypes: data.attachments.map(item => item.attachmentFileType)
-        };
+        const formattedData = formatIncidentData(data);
 
         setIncident(formattedData);
         setSelectedMedia(formattedData.media[0]);
@@ -55,22 +42,7 @@ export default function IncidentPage() {
     };
 
     fetchIncidentData();
-  }, [router.query.id]);
-
-  const getTimeAgo = (date) => {
-    const seconds = Math.floor((new Date() - date) / 1000);
-    let interval = Math.floor(seconds / 31536000);
-    if (interval > 1) return interval + "y";
-    interval = Math.floor(seconds / 2592000);
-    if (interval > 1) return interval + "mo";
-    interval = Math.floor(seconds / 86400);
-    if (interval > 1) return interval + "d";
-    interval = Math.floor(seconds / 3600);
-    if (interval > 1) return interval + "h";
-    interval = Math.floor(seconds / 60);
-    if (interval > 1) return interval + "m";
-    return Math.floor(seconds) + "s";
-  };
+  }, [router.query.id, initialData]);
 
   if (loading) {
     return (
@@ -149,56 +121,56 @@ export default function IncidentPage() {
   return (
     <>
       <Head>
-        <title>{incident.title}</title>
-        <meta name="description" content={incident.description} />
+        <title>{incident?.title || 'News Details'}</title>
+        <meta name="description" content={incident?.description || ''} />
         
         {/* Essential Open Graph tags */}
         <meta property="og:type" content="article" />
-        <meta property="og:url" content={`https://awaazeye.com/news/${router.query.id}`} />
-        <meta property="og:title" content={incident.title} />
-        <meta property="og:description" content={incident.description} />
+        <meta property="og:url" content={`https://aawaz-landing-pagee.onrender.com/${router.query.id}`} />
+        <meta property="og:title" content={incident?.title || ''} />
+        <meta property="og:description" content={incident?.description || ''} />
         <meta property="og:site_name" content="Awaaz Eye" />
 
         {/* Handle media content */}
-        {hasVideo ? (
+        {incident?.media?.some(url => url.endsWith('.mp4')) ? (
           <>
-            <meta property="og:video" content={firstVideo} />
-            <meta property="og:video:url" content={firstVideo} />
-            <meta property="og:video:secure_url" content={firstVideo} />
+            <meta property="og:video" content={incident.media.find(url => url.endsWith('.mp4'))} />
+            <meta property="og:video:url" content={incident.media.find(url => url.endsWith('.mp4'))} />
+            <meta property="og:video:secure_url" content={incident.media.find(url => url.endsWith('.mp4'))} />
             <meta property="og:video:type" content="video/mp4" />
             <meta property="og:video:width" content="1280" />
             <meta property="og:video:height" content="720" />
-            <meta property="og:image" content={incident.thumbnails[0]} />
+            <meta property="og:image" content={incident?.thumbnails?.[0]} />
           </>
         ) : (
           <>
-            <meta property="og:image" content={firstImage} />
-            <meta property="og:image:secure_url" content={firstImage} />
+            <meta property="og:image" content={incident?.media?.[0]} />
+            <meta property="og:image:secure_url" content={incident?.media?.[0]} />
             <meta property="og:image:width" content="1200" />
             <meta property="og:image:height" content="630" />
-            <meta property="og:image:alt" content={incident.title} />
+            <meta property="og:image:alt" content={incident?.title} />
           </>
         )}
 
         {/* Twitter Card tags */}
-        <meta name="twitter:card" content={hasVideo ? "player" : "summary_large_image"} />
+        <meta name="twitter:card" content={incident?.media?.some(url => url.endsWith('.mp4')) ? "player" : "summary_large_image"} />
         <meta name="twitter:site" content="@AwaazEye" />
-        <meta name="twitter:title" content={incident.title} />
-        <meta name="twitter:description" content={incident.description} />
+        <meta name="twitter:title" content={incident?.title || ''} />
+        <meta name="twitter:description" content={incident?.description || ''} />
         
-        {hasVideo ? (
+        {incident?.media?.some(url => url.endsWith('.mp4')) ? (
           <>
-            <meta name="twitter:player" content={firstVideo} />
+            <meta name="twitter:player" content={incident.media.find(url => url.endsWith('.mp4'))} />
             <meta name="twitter:player:width" content="1280" />
             <meta name="twitter:player:height" content="720" />
-            <meta name="twitter:player:stream" content={firstVideo} />
+            <meta name="twitter:player:stream" content={incident.media.find(url => url.endsWith('.mp4'))} />
             <meta name="twitter:player:stream:content_type" content="video/mp4" />
-            <meta name="twitter:image" content={incident.thumbnails[0]} />
+            <meta name="twitter:image" content={incident?.thumbnails?.[0]} />
           </>
         ) : (
           <>
-            <meta name="twitter:image" content={firstImage} />
-            <meta name="twitter:image:alt" content={incident.title} />
+            <meta name="twitter:image" content={incident?.media?.[0]} />
+            <meta name="twitter:image:alt" content={incident?.title} />
           </>
         )}
 
@@ -389,4 +361,70 @@ const styles = {
     margin: "0 auto",
   },
 };
+const getTimeAgo = (date) => {
+  const seconds = Math.floor((new Date() - date) / 1000);
+  let interval = Math.floor(seconds / 31536000);
+  if (interval > 1) return interval + "y";
+  interval = Math.floor(seconds / 2592000);
+  if (interval > 1) return interval + "mo";
+  interval = Math.floor(seconds / 86400);
+  if (interval > 1) return interval + "d";
+  interval = Math.floor(seconds / 3600);
+  if (interval > 1) return interval + "h";
+  interval = Math.floor(seconds / 60);
+  if (interval > 1) return interval + "m";
+  return Math.floor(seconds) + "s";
+};
+
+// Helper function to format incident data
+function formatIncidentData(data) {
+  return {
+    id: data._id,
+    title: data.title,
+    description: data.description,
+    date: new Date(data.eventTime).toLocaleDateString('en-US', {
+      day: 'numeric',
+      month: 'short'
+    }),
+    time: getTimeAgo(new Date(data.eventTime)),
+    notified: data.notifiedUserCount,
+    media: data.attachments.map(item => item.attachment),
+    thumbnails: data.attachments.map(item => item.thumbnail),
+    mediaTypes: data.attachments.map(item => item.attachmentFileType)
+  };
+}
+
+// Add getServerSideProps for server-side rendering
+export async function getServerSideProps({ params }) {
+  try {
+    const response = await axios.get(`https://awaazeye.com/api/v1/event-post/event/${params.id}`);
+    
+    
+    if (!response?.data?.body) {
+      return {
+        props: {
+          error: true,
+          initialData: null
+        }
+      };
+    }
+
+    const formattedData = formatIncidentData(response.data.body);
+
+    return {
+      props: {
+        initialData: formattedData,
+        error: false
+      }
+    };
+  } catch (error) {
+    console.error('Server-side error fetching incident:', error);
+    return {
+      props: {
+        error: true,
+        initialData: null
+      }
+    };
+  }
+}
 
