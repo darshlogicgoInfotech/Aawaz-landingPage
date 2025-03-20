@@ -1,6 +1,6 @@
 const incidents = [
   {
-    id: "1",
+    id: "67cfbc725cd45c3a15343fe4",
     title: "Fire Breakout in Downtown",
     description: "A massive fire broke out in downtown. Firefighters are on the scene.",
     media: [
@@ -18,7 +18,7 @@ const incidents = [
     notified: "13.5k"
   },
   {
-    id: "2",
+    id: "67cfd4605cd45c3a153440cb",
     title: "Flood Alert Issued",
     description: "Heavy rains have led to floods in the city. Authorities have issued warnings.",
     media: [
