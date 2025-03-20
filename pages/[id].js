@@ -3,77 +3,30 @@ import Image from "next/image";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import Slider from "react-slick";
+import incidents from "../data/incidents";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
-
-// Static data for testing
-const incidents = [
-  {
-    _id: "67cfbc725cd45c3a15343fe4",
-    title: "Traffic Jam Alert",
-    description: "Heavy traffic reported on Main Street due to construction work",
-    eventTime: "2024-03-11T04:29:43.879Z",
-    viewCounts: "1",
-    commentCounts: "0",
-    reactionCounts: "0",
-    sharedCount: "0",
-    notifiedUserCount: "5",
-    address: "Main Street",
-    attachments: [
-      {
-        type: "default",
-        title: "Traffic Jam",
-        attachment: "https://guardianshot.blr1.cdn.digitaloceanspaces.com/eagleEye/event-post/1741667441653.mp4",
-        thumbnail: "https://guardianshot.blr1.cdn.digitaloceanspaces.com/eagleEye/event-post/1741667441844.png",
-        description: "Traffic situation",
-        attachmentFileType: "Video"
-      }
-    ]
-  },
-  {
-    _id: "67cfd4605cd45c3a153440cb",
-    title: "Road Accident Alert",
-    description: "Minor accident reported near City Center",
-    eventTime: "2024-03-11T05:45:00.000Z",
-    viewCounts: "3",
-    commentCounts: "1",
-    reactionCounts: "2",
-    sharedCount: "1",
-    notifiedUserCount: "10",
-    address: "City Center",
-    attachments: [
-      {
-        type: "default",
-        title: "Accident Scene",
-        attachment: "https://guardianshot.blr1.cdn.digitaloceanspaces.com/eagleEye/event-post/accident.jpg",
-        thumbnail: "https://guardianshot.blr1.cdn.digitaloceanspaces.com/eagleEye/event-post/accident_thumb.jpg",
-        description: "Accident situation",
-        attachmentFileType: "Image"
-      }
-    ]
-  }
-];
 
 function formatIncidentData(data) {
   if (!data) return null;
   
   return {
-    id: data._id,
-    title: data.title || 'Awaaz Eye News',
-    description: data.description || 'Latest news and updates from Awaaz Eye',
-    date: new Date(data.eventTime).toLocaleDateString('en-US', {
+    id: data.body._id,
+    title: data.body.title || 'Awaaz Eye News',
+    description: data.body.description || 'Latest news and updates from Awaaz Eye',
+    date: new Date(data.body.eventTime).toLocaleDateString('en-US', {
       day: 'numeric',
       month: 'short'
     }),
-    time: getTimeAgo(new Date(data.eventTime)),
-    notified: data.notifiedUserCount,
-    media: data.attachments?.map(item => item.attachment) || [],
-    thumbnails: data.attachments?.map(item => item.thumbnail) || [],
-    mediaTypes: data.attachments?.map(item => item.attachmentFileType) || [],
-    ogImage: data.attachments?.[0]?.thumbnail || data.attachments?.[0]?.attachment || '',
-    ogVideo: data.attachments?.find(item => item.attachmentFileType === 'Video')?.attachment || '',
-    ogType: data.attachments?.some(item => item.attachmentFileType === 'Video') ? 'video.other' : 'website',
-    url: `https://aawaz-landingpage.onrender.com/${data._id}`
+    time: getTimeAgo(new Date(data.body.eventTime)),
+    notified: data.body.notifiedUserCount,
+    media: data.body.attachments?.map(item => item.attachment) || [],
+    thumbnails: data.body.attachments?.map(item => item.thumbnail) || [],
+    mediaTypes: data.body.attachments?.map(item => item.attachmentFileType) || [],
+    ogImage: data.body.attachments?.[0]?.thumbnail || data.body.attachments?.[0]?.attachment || '',
+    ogVideo: data.body.attachments?.find(item => item.attachmentFileType === 'Video')?.attachment || '',
+    ogType: data.body.attachments?.some(item => item.attachmentFileType === 'Video') ? 'video.other' : 'website',
+    url: `https://aawaz-landingpage.onrender.com/${data.body._id}`
   };
 }
 
@@ -406,8 +359,8 @@ export async function getServerSideProps({ params, res }) {
   res.setHeader('Content-Type', 'text/html; charset=utf-8');
 
   try {
-    // Find incident from static data
-    const incident = incidents.find(item => item._id === params.id);
+    // Find incident from incidents.js data
+    const incident = incidents.find(item => item.body._id === params.id);
     
     if (!incident) {
       return {
