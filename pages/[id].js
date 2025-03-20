@@ -23,11 +23,7 @@ function formatIncidentData(data) {
     notified: data.notifiedUserCount,
     media: data.attachments?.map(item => item.attachment) || [],
     thumbnails: data.attachments?.map(item => item.thumbnail) || [],
-    mediaTypes: data.attachments?.map(item => item.attachmentFileType) || [],
-    ogImage: data.attachments?.[0]?.thumbnail || data.attachments?.[0]?.attachment || '',
-    ogVideo: data.attachments?.find(item => item.attachmentFileType === 'Video')?.attachment || '',
-    ogType: data.attachments?.some(item => item.attachmentFileType === 'Video') ? 'video.other' : 'website',
-    url: `https://aawaz-landingpage.onrender.com/${data._id}`
+    mediaTypes: data.attachments?.map(item => item.attachmentFileType) || []
   };
 }
 
@@ -158,7 +154,6 @@ export default function IncidentPage({ initialData, error: serverError }) {
 
   return (
     <>
-      <MetaTags incident={incident} />
       <Head>
         <title>{incident.title}</title>
         <meta name="description" content={incident.description} />
@@ -168,28 +163,27 @@ export default function IncidentPage({ initialData, error: serverError }) {
         <meta name="description" content={incident.description} />
         
         {/* Open Graph / Facebook */}
-        <meta property="og:type" content={incident.ogType} />
-        <meta property="og:url" content={incident.url} />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content={`https://aawaz-landingpage.onrender.com/${router.query.id}`} />
         <meta property="og:title" content={incident.title} />
         <meta property="og:description" content={incident.description} />
         <meta property="og:site_name" content="Awaaz Eye" />
-        <meta property="og:locale" content="en_US" />
         
-        {incident.ogVideo ? (
+        {hasVideo ? (
           <>
-            <meta property="og:video" content={incident.ogVideo} />
-            <meta property="og:video:url" content={incident.ogVideo} />
-            <meta property="og:video:secure_url" content={incident.ogVideo} />
+            <meta property="og:video" content={firstVideo} />
+            <meta property="og:video:url" content={firstVideo} />
+            <meta property="og:video:secure_url" content={firstVideo} />
             <meta property="og:video:type" content="video/mp4" />
             <meta property="og:video:width" content="1280" />
             <meta property="og:video:height" content="720" />
-            <meta property="og:image" content={incident.ogImage} />
-            <meta property="og:image:secure_url" content={incident.ogImage} />
+            <meta property="og:image" content={firstThumbnail} />
+            <meta property="og:image:secure_url" content={firstThumbnail} />
           </>
         ) : (
           <>
-            <meta property="og:image" content={incident.ogImage} />
-            <meta property="og:image:secure_url" content={incident.ogImage} />
+            <meta property="og:image" content={firstImage} />
+            <meta property="og:image:secure_url" content={firstImage} />
           </>
         )}
         <meta property="og:image:width" content="1200" />
@@ -197,24 +191,24 @@ export default function IncidentPage({ initialData, error: serverError }) {
         <meta property="og:image:alt" content={incident.title} />
 
         {/* Twitter */}
-        <meta name="twitter:card" content={incident.ogVideo ? "player" : "summary_large_image"} />
+        <meta name="twitter:card" content={hasVideo ? "player" : "summary_large_image"} />
         <meta name="twitter:site" content="@AwaazEye" />
         <meta name="twitter:creator" content="@AwaazEye" />
         <meta name="twitter:title" content={incident.title} />
         <meta name="twitter:description" content={incident.description} />
         
-        {incident.ogVideo ? (
+        {hasVideo ? (
           <>
-            <meta name="twitter:player" content={incident.ogVideo} />
+            <meta name="twitter:player" content={firstVideo} />
             <meta name="twitter:player:width" content="1280" />
             <meta name="twitter:player:height" content="720" />
-            <meta name="twitter:player:stream" content={incident.ogVideo} />
+            <meta name="twitter:player:stream" content={firstVideo} />
             <meta name="twitter:player:stream:content_type" content="video/mp4" />
-            <meta name="twitter:image" content={incident.ogImage} />
+            <meta name="twitter:image" content={firstThumbnail} />
           </>
         ) : (
           <>
-            <meta name="twitter:image" content={incident.ogImage} />
+            <meta name="twitter:image" content={firstImage} />
             <meta name="twitter:image:alt" content={incident.title} />
           </>
         )}
@@ -224,8 +218,8 @@ export default function IncidentPage({ initialData, error: serverError }) {
         <meta property="article:author" content="Awaaz Eye" />
         
         {/* Microsoft Teams / Skype */}
-        <meta name="msapplication-TileImage" content={incident.ogImage} />
-        <meta name="thumbnail" content={incident.ogImage} />
+        <meta name="msapplication-TileImage" content={firstImage} />
+        <meta name="thumbnail" content={firstThumbnail || firstImage} />
 
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
         <style>
@@ -416,33 +410,14 @@ const styles = {
 };
 
 export async function getServerSideProps({ params, res }) {
-  console.log("params>>>>>>>>", params)
-  // Ignore favicon.ico requests
-  if (params.id === 'favicon.ico') {
-    return {
-      redirect: {
-        destination: '/favicon.ico',
-        permanent: true,
-      },
-    };
-  }
-
-  // Set cache control headers for better meta tag caching
+  // Set cache control headers
   res.setHeader(
     'Cache-Control',
     'public, s-maxage=10, stale-while-revalidate=59'
   );
 
-  // Set content type for better meta tag parsing
-  res.setHeader('Content-Type', 'text/html; charset=utf-8');
-
   try {
-    const response = await axios.get(`https://awaazeye.com/api/v1/event-post/event/${params.id}`, {
-      headers: {
-        'Accept': 'application/json',
-        'Cache-Control': 'no-cache'
-      }
-    });
+    const response = await axios.get(`https://awaazeye.com/api/v1/event-post/event/${params.id}`);
     
     if (!response?.data?.body) {
       return {
@@ -453,28 +428,7 @@ export async function getServerSideProps({ params, res }) {
       };
     }
 
-    const data = response.data.body;
-    
-    // Format data for meta tags
-    const formattedData = {
-      id: data._id,
-      title: data.title || 'Awaaz Eye News',
-      description: data.description || 'Latest news and updates from Awaaz Eye',
-      date: new Date(data.eventTime).toLocaleDateString('en-US', {
-        day: 'numeric',
-        month: 'short'
-      }),
-      time: getTimeAgo(new Date(data.eventTime)),
-      notified: data.notifiedUserCount,
-      media: data.attachments?.map(item => item.attachment) || [],
-      thumbnails: data.attachments?.map(item => item.thumbnail) || [],
-      mediaTypes: data.attachments?.map(item => item.attachmentFileType) || [],
-      // Add meta specific fields
-      ogImage: data.attachments?.[0]?.thumbnail || data.attachments?.[0]?.attachment || '',
-      ogVideo: data.attachments?.find(item => item.attachmentFileType === 'Video')?.attachment || '',
-      ogType: data.attachments?.some(item => item.attachmentFileType === 'Video') ? 'video.other' : 'website',
-      url: `https://aawaz-landingpage.onrender.com/${data._id}`
-    };
+    const formattedData = formatIncidentData(response.data.body);
 
     return {
       props: {
@@ -491,82 +445,4 @@ export async function getServerSideProps({ params, res }) {
       }
     };
   }
-}
-
-function MetaTags({ incident }) {
-  if (!incident) return null;
-
-  return (
-    <Head>
-      <title>{incident.title}</title>
-      <meta name="description" content={incident.description} />
-      
-      {/* Basic Meta Tags */}
-      <meta name="title" content={incident.title} />
-      <meta name="description" content={incident.description} />
-      
-      {/* Open Graph / Facebook */}
-      <meta property="og:type" content={incident.ogType} />
-      <meta property="og:url" content={incident.url} />
-      <meta property="og:title" content={incident.title} />
-      <meta property="og:description" content={incident.description} />
-      <meta property="og:site_name" content="Awaaz Eye" />
-      <meta property="og:locale" content="en_US" />
-      
-      {incident.ogVideo ? (
-        <>
-          <meta property="og:video" content={incident.ogVideo} />
-          <meta property="og:video:url" content={incident.ogVideo} />
-          <meta property="og:video:secure_url" content={incident.ogVideo} />
-          <meta property="og:video:type" content="video/mp4" />
-          <meta property="og:video:width" content="1280" />
-          <meta property="og:video:height" content="720" />
-          <meta property="og:image" content={incident.ogImage} />
-          <meta property="og:image:secure_url" content={incident.ogImage} />
-        </>
-      ) : (
-        <>
-          <meta property="og:image" content={incident.ogImage} />
-          <meta property="og:image:secure_url" content={incident.ogImage} />
-        </>
-      )}
-      <meta property="og:image:width" content="1200" />
-      <meta property="og:image:height" content="630" />
-      <meta property="og:image:alt" content={incident.title} />
-
-      {/* Twitter */}
-      <meta name="twitter:card" content={incident.ogVideo ? "player" : "summary_large_image"} />
-      <meta name="twitter:site" content="@AwaazEye" />
-      <meta name="twitter:creator" content="@AwaazEye" />
-      <meta name="twitter:title" content={incident.title} />
-      <meta name="twitter:description" content={incident.description} />
-      
-      {incident.ogVideo ? (
-        <>
-          <meta name="twitter:player" content={incident.ogVideo} />
-          <meta name="twitter:player:width" content="1280" />
-          <meta name="twitter:player:height" content="720" />
-          <meta name="twitter:player:stream" content={incident.ogVideo} />
-          <meta name="twitter:player:stream:content_type" content="video/mp4" />
-          <meta name="twitter:image" content={incident.ogImage} />
-        </>
-      ) : (
-        <>
-          <meta name="twitter:image" content={incident.ogImage} />
-          <meta name="twitter:image:alt" content={incident.title} />
-        </>
-      )}
-
-      {/* Additional Meta Tags for Better Social Media Support */}
-      <meta property="article:published_time" content={new Date().toISOString()} />
-      <meta property="article:author" content="Awaaz Eye" />
-      
-      {/* Microsoft Teams / Skype */}
-      <meta name="msapplication-TileImage" content={incident.ogImage} />
-      <meta name="thumbnail" content={incident.ogImage} />
-      
-      {/* Preconnect to media domains */}
-      <link rel="preconnect" href="https://guardianshot.blr1.cdn.digitaloceanspaces.com" />
-    </Head>
-  );
 }
