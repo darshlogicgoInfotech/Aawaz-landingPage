@@ -282,9 +282,10 @@ export default function IncidentPage({ initialData, error: serverError }) {
                             src={item}
                             alt={incident.title}
                             width={400}
-                            height={300}
-                            style={styles.image}
-                            objectFit="cover"
+                            height={225}
+                            layout="responsive"
+                            objectFit="fill"
+                            priority
                           />
                         </div>
                       )}
@@ -312,9 +313,10 @@ export default function IncidentPage({ initialData, error: serverError }) {
                             src={item}
                             alt={incident.title}
                             width={400}
-                            height={300}
-                            style={styles.image}
-                            objectFit="cover"
+                            height={225}
+                            layout="responsive"
+                            objectFit="fill"
+                            priority
                           />
                         </div>
                       )}
@@ -360,7 +362,7 @@ const styles = {
   sliderContainer: {
     background: "rgba(255, 255, 255, 0.05)",
     borderRadius: "16px",
-    padding: "1rem 1rem 3rem 1rem",
+    padding: "1rem",
     marginBottom: "1.5rem",
     boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.2)",
     backdropFilter: "blur(4px)",
