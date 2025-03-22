@@ -234,19 +234,23 @@ export default function IncidentPage({ initialData, error: serverError }) {
             }
             .media-slide {
               padding: 0 10px;
-              height: 250px;
+              aspect-ratio: 16/9;
+              max-width: 500px;
+              margin: 0 auto;
             }
             .slick-track {
               display: flex !important;
               align-items: center !important;
-              margin-left: 0 !important;
-              margin-right: 0 !important;
             }
             .slick-slide {
               margin: 0 5px;
+              height: auto !important;
             }
             .slick-slide > div {
               height: 100%;
+              display: flex;
+              align-items: center;
+              justify-content: center;
             }
           `}
         </style>
@@ -266,11 +270,10 @@ export default function IncidentPage({ initialData, error: serverError }) {
                           <video 
                             style={styles.video}
                             controls
-                            poster={fallbackImage}
-                            preload="metadata"
+                            playsInline
+                            preload="auto"
                           >
                             <source src={item} type="video/mp4" />
-                            Your browser does not support the video tag.
                           </video>
                         </div>
                       ) : (
@@ -297,11 +300,10 @@ export default function IncidentPage({ initialData, error: serverError }) {
                           <video 
                             style={styles.video}
                             controls
-                            poster={fallbackImage}
-                            preload="metadata"
+                            playsInline
+                            preload="auto"
                           >
                             <source src={item} type="video/mp4" />
-                            Your browser does not support the video tag.
                           </video>
                         </div>
                       ) : (
@@ -387,34 +389,33 @@ const styles = {
   },
   staticMediaItem: {
     width: "100%",
-    maxWidth: "400px",
+    maxWidth: "500px",
     margin: "0 auto",
   },
   mediaWrapper: {
     position: "relative",
     width: "100%",
-    height: "250px",
+    maxWidth: "500px",
+    aspectRatio: "16/9",
     borderRadius: "12px",
     overflow: "hidden",
     border: "3px solid rgba(255, 255, 255, 0.1)",
     boxShadow: "0 4px 20px rgba(0, 0, 0, 0.3)",
-    background: "rgba(0, 0, 0, 0.4)",
-    transition: "all 0.3s ease",
     margin: "0 auto",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
+    background: "rgba(0, 0, 0, 0.1)",
   },
   image: {
     width: "100%",
     height: "100%",
-    objectFit: "cover",
+    objectFit: "contain",
+    display: "block",
   },
   video: {
     width: "100%",
     height: "100%",
-    objectFit: "",
-    backgroundColor: "#000",
+    objectFit: "contain",
+    display: "block",
+    backgroundColor: "transparent",
   },
   detailsContainer: {
     marginTop: "1rem",
