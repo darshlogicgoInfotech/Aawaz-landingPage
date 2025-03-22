@@ -149,67 +149,59 @@ export default function IncidentPage({ initialData, error: serverError }) {
         <meta name="title" content={incident.title} />
         <meta name="description" content={incident.description} />
         
-        {/* Open Graph / Facebook & WhatsApp */}
-        <meta property="og:type" content={hasVideo ? "video.other" : "website"} />
+        {/* Essential Open Graph tags for link preview */}
+        <meta property="og:type" content={hasVideo ? "video" : "article"} />
         <meta property="og:url" content={`https://news.awaazeye.com/${router.query.id}`} />
         <meta property="og:title" content={incident.title} />
         <meta property="og:description" content={incident.description} />
         <meta property="og:site_name" content="Awaaz Eye" />
-        
+
         {hasVideo ? (
           <>
-            {/* Video Meta Tags */}
+            {/* Video preview meta tags */}
             <meta property="og:video" content={firstVideoItem} />
-            <meta property="og:video:url" content={firstVideoItem} />
-            <meta property="og:video:secure_url" content={firstVideoItem} />
             <meta property="og:video:type" content="video/mp4" />
             <meta property="og:video:width" content="1280" />
             <meta property="og:video:height" content="720" />
+            <meta property="og:image" content={firstThumbnail || fallbackImage} />
+            <meta property="og:image:width" content="1280" />
+            <meta property="og:image:height" content="720" />
+            <meta property="og:image:alt" content={incident.title} />
             
-            {/* Fallback image for platforms that don't support video */}
-            <meta property="og:image" content={fallbackImage} />
-            <meta property="og:image:secure_url" content={fallbackImage} />
-            <meta property="og:image:type" content="image/jpeg" />
-          </>
-        ) : (
-          <>
-            <meta property="og:image" content={firstImageItem || fallbackImage} />
-            <meta property="og:image:secure_url" content={firstImageItem || fallbackImage} />
-            <meta property="og:image:type" content="image/jpeg" />
-          </>
-        )}
-        
-        <meta property="og:image:width" content="1200" />
-        <meta property="og:image:height" content="630" />
-        <meta property="og:image:alt" content={incident.title} />
-        <meta property="og:updated_time" content={new Date().toISOString()} />
-
-        {/* Twitter */}
-        <meta name="twitter:card" content={hasVideo ? "player" : "summary_large_image"} />
-        <meta name="twitter:site" content="@AwaazEye" />
-        <meta name="twitter:title" content={incident.title} />
-        <meta name="twitter:description" content={incident.description} />
-        
-        {hasVideo ? (
-          <>
+            {/* Twitter video card */}
+            <meta name="twitter:card" content="player" />
+            <meta name="twitter:site" content="@AwaazEye" />
+            <meta name="twitter:title" content={incident.title} />
+            <meta name="twitter:description" content={incident.description} />
             <meta name="twitter:player" content={firstVideoItem} />
             <meta name="twitter:player:width" content="1280" />
             <meta name="twitter:player:height" content="720" />
-            <meta name="twitter:player:stream" content={firstVideoItem} />
-            <meta name="twitter:player:stream:content_type" content="video/mp4" />
-            <meta name="twitter:image" content={fallbackImage} />
+            <meta name="twitter:image" content={firstThumbnail || fallbackImage} />
           </>
         ) : (
           <>
+            {/* Image preview meta tags */}
+            <meta property="og:image" content={firstImageItem || fallbackImage} />
+            <meta property="og:image:width" content="1200" />
+            <meta property="og:image:height" content="630" />
+            <meta property="og:image:alt" content={incident.title} />
+            
+            {/* Twitter image card */}
+            <meta name="twitter:card" content="summary_large_image" />
+            <meta name="twitter:site" content="@AwaazEye" />
+            <meta name="twitter:title" content={incident.title} />
+            <meta name="twitter:description" content={incident.description} />
             <meta name="twitter:image" content={firstImageItem || fallbackImage} />
-            <meta name="twitter:image:alt" content={incident.title} />
           </>
         )}
 
-        {/* Microsoft Teams / Skype */}
-        <meta name="msapplication-TileImage" content={fallbackImage} />
-        <meta name="thumbnail" content={fallbackImage} />
-        
+        {/* Microsoft Teams / Skype preview */}
+        <meta name="msapplication-TileImage" content={firstThumbnail || fallbackImage} />
+        <meta name="thumbnail" content={firstThumbnail || fallbackImage} />
+
+        {/* Force refresh for link preview */}
+        <meta property="og:updated_time" content={new Date().toISOString()} />
+
         {/* Additional Meta Tags for Better Social Media Support */}
         <meta property="article:published_time" content={new Date().toISOString()} />
         <meta property="article:modified_time" content={new Date().toISOString()} />
