@@ -42,6 +42,12 @@ function getTimeAgo(date) {
   return Math.floor(seconds) + "s";
 }
 
+// Update the helper function to get video poster
+function getVideoPoster(videoUrl) {
+  if (!videoUrl) return '';
+  return `https://awaazeye.com/api/v1/video-thumbnail?url=${encodeURIComponent(videoUrl)}`;
+}
+
 export default function IncidentPage({ initialData, error: serverError }) {
   const router = useRouter();
   const [incident, setIncident] = useState(initialData);
@@ -130,10 +136,11 @@ export default function IncidentPage({ initialData, error: serverError }) {
   
   const firstVideoItem = mediaItems.find(url => getMediaType(url) === 'video');
   const firstImageItem = mediaItems.find(url => getMediaType(url) === 'image');
-  const firstThumbnail = thumbnails[0] || '';
-  
+  const firstThumbnail = thumbnails[0];
+  const videoPoster = firstVideoItem ? getVideoPoster(firstVideoItem) : '';
+  const fallbackImage = firstThumbnail || videoPoster || firstImageItem || '';
+
   const hasVideo = !!firstVideoItem;
-  const fallbackImage = firstThumbnail || firstImageItem || '';
 
   return (
     <>
@@ -163,7 +170,7 @@ export default function IncidentPage({ initialData, error: serverError }) {
             <meta property="og:video:type" content="video/mp4" />
             <meta property="og:video:width" content="1280" />
             <meta property="og:video:height" content="720" />
-            <meta property="og:image" content={firstThumbnail || fallbackImage} />
+            <meta property="og:image" content={fallbackImage} />
             <meta property="og:image:width" content="1280" />
             <meta property="og:image:height" content="720" />
             <meta property="og:image:alt" content={incident.title} />
@@ -176,7 +183,7 @@ export default function IncidentPage({ initialData, error: serverError }) {
             <meta name="twitter:player" content={firstVideoItem} />
             <meta name="twitter:player:width" content="1280" />
             <meta name="twitter:player:height" content="720" />
-            <meta name="twitter:image" content={firstThumbnail || fallbackImage} />
+            <meta name="twitter:image" content={fallbackImage} />
           </>
         ) : (
           <>
@@ -196,8 +203,8 @@ export default function IncidentPage({ initialData, error: serverError }) {
         )}
 
         {/* Microsoft Teams / Skype preview */}
-        <meta name="msapplication-TileImage" content={firstThumbnail || fallbackImage} />
-        <meta name="thumbnail" content={firstThumbnail || fallbackImage} />
+        <meta name="msapplication-TileImage" content={fallbackImage} />
+        <meta name="thumbnail" content={fallbackImage} />
 
         {/* Force refresh for link preview */}
         <meta property="og:updated_time" content={new Date().toISOString()} />
@@ -256,8 +263,14 @@ export default function IncidentPage({ initialData, error: serverError }) {
                     <div key={index} style={styles.staticMediaItem}>
                       {getMediaType(item) === 'video' ? (
                         <div style={styles.mediaWrapper}>
-                          <video style={styles.video} controls>
+                          <video 
+                            style={styles.video}
+                            controls
+                            poster={fallbackImage}
+                            preload="metadata"
+                          >
                             <source src={item} type="video/mp4" />
+                            Your browser does not support the video tag.
                           </video>
                         </div>
                       ) : (
@@ -281,8 +294,14 @@ export default function IncidentPage({ initialData, error: serverError }) {
                     <div key={index} className="media-slide">
                       {getMediaType(item) === 'video' ? (
                         <div style={styles.mediaWrapper}>
-                          <video style={styles.video} controls>
+                          <video 
+                            style={styles.video}
+                            controls
+                            poster={fallbackImage}
+                            preload="metadata"
+                          >
                             <source src={item} type="video/mp4" />
+                            Your browser does not support the video tag.
                           </video>
                         </div>
                       ) : (
