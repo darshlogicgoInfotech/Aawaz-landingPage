@@ -65,7 +65,6 @@ export default function IncidentPage({ initialData, error: serverError }) {
         const formattedData = formatIncidentData(response.data.body);
         setIncident(formattedData);
       } catch (error) {
-        console.error('Error fetching incident:', error);
         setError(true);
       } finally {
         setLoading(false);
@@ -75,37 +74,7 @@ export default function IncidentPage({ initialData, error: serverError }) {
     fetchIncidentData();
   }, [router.query.id, initialData]);
 
-  console.log("incident>>>>>>>>>", incident);
-
-  if (loading) {
-    return (
-      <div style={{
-        minHeight: "100vh",
-        background: "linear-gradient(135deg, #000000, #1a1a1a)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center"
-      }}>
-        <div className="loading-spinner" />
-        <style jsx>{`
-          .loading-spinner {
-            width: 50px;
-            height: 50px;
-            border: 5px solid rgba(255, 255, 255, 0.1);
-            border-radius: 50%;
-            border-top-color: #fff;
-            animation: spin 1s ease-in-out infinite;
-          }
-          
-          @keyframes spin {
-            to { transform: rotate(360deg); }
-          }
-        `}</style>
-      </div>
-    );
-  }
-
-  if (error || !incident) {
+  if (loading || error || !incident || !router.query.id) {
     return (
       <div style={{
         minHeight: "100vh",
@@ -116,7 +85,7 @@ export default function IncidentPage({ initialData, error: serverError }) {
         color: "white",
         fontFamily: "Inter, sans-serif"
       }}>
-        <h1>News Not Found</h1>
+        <h1>News Not Found!!</h1>
       </div>
     );
   }
@@ -147,79 +116,100 @@ export default function IncidentPage({ initialData, error: serverError }) {
     ],
   };
 
-  const hasVideo = incident.media.some(url => url.endsWith('.mp4'));
-  const firstVideo = hasVideo ? incident.media.find(url => url.endsWith('.mp4')) : null;
-  const firstImage = incident.media[0] || '';
-  const firstThumbnail = incident.thumbnails[0] || '';
+  // Improved media type detection
+  const getMediaType = (url) => {
+    if (!url) return null;
+    if (url.toLowerCase().endsWith('.mp4')) return 'video';
+    if (url.toLowerCase().match(/\.(jpg|jpeg|png|gif|webp)$/)) return 'image';
+    return null;
+  };
+
+  // Safe media checks
+  const mediaItems = incident?.media || [];
+  const thumbnails = incident?.thumbnails || [];
+  
+  const firstVideoItem = mediaItems.find(url => getMediaType(url) === 'video');
+  const firstImageItem = mediaItems.find(url => getMediaType(url) === 'image');
+  const firstThumbnail = thumbnails[0] || '';
+  
+  const hasVideo = !!firstVideoItem;
+  const fallbackImage = firstThumbnail || firstImageItem || '';
 
   return (
     <>
       <Head>
         <title>{incident.title}</title>
-        <meta name="description" content={incident.description} />
+        
+        {/* Cache Control Meta Tags */}
+        <meta httpEquiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+        <meta httpEquiv="Pragma" content="no-cache" />
+        <meta httpEquiv="Expires" content="0" />
         
         {/* Basic Meta Tags */}
         <meta name="title" content={incident.title} />
         <meta name="description" content={incident.description} />
         
-        {/* Open Graph / Facebook */}
-        <meta property="og:type" content="website" />
-        <meta property="og:url" content={`https://aawaz-landingpage.onrender.com/${router.query.id}`} />
+        {/* Open Graph / Facebook & WhatsApp */}
+        <meta property="og:type" content="video.other" />
+        <meta property="og:url" content={`https://news.awaazeye.com/${router.query.id}`} />
         <meta property="og:title" content={incident.title} />
         <meta property="og:description" content={incident.description} />
         <meta property="og:site_name" content="Awaaz Eye" />
         
         {hasVideo ? (
           <>
-            <meta property="og:video" content={firstVideo} />
-            <meta property="og:video:url" content={firstVideo} />
-            <meta property="og:video:secure_url" content={firstVideo} />
+            {/* Video Meta Tags */}
+            <meta property="og:video" content={firstVideoItem} />
+            <meta property="og:video:url" content={firstVideoItem} />
+            <meta property="og:video:secure_url" content={firstVideoItem} />
             <meta property="og:video:type" content="video/mp4" />
             <meta property="og:video:width" content="1280" />
             <meta property="og:video:height" content="720" />
+            
+            {/* Thumbnail for video */}
             <meta property="og:image" content={firstThumbnail} />
             <meta property="og:image:secure_url" content={firstThumbnail} />
-          </>
-        ) : (
-          <>
-            <meta property="og:image" content={firstImage} />
-            <meta property="og:image:secure_url" content={firstImage} />
-          </>
-        )}
-        <meta property="og:image:width" content="1200" />
-        <meta property="og:image:height" content="630" />
-        <meta property="og:image:alt" content={incident.title} />
-
-        {/* Twitter */}
-        <meta name="twitter:card" content={hasVideo ? "player" : "summary_large_image"} />
-        <meta name="twitter:site" content="@AwaazEye" />
-        <meta name="twitter:creator" content="@AwaazEye" />
-        <meta name="twitter:title" content={incident.title} />
-        <meta name="twitter:description" content={incident.description} />
-        
-        {hasVideo ? (
-          <>
-            <meta name="twitter:player" content={firstVideo} />
+            <meta property="og:image:type" content="image/jpeg" />
+            <meta property="og:image:width" content="1200" />
+            <meta property="og:image:height" content="630" />
+            
+            {/* Twitter Video Player Card */}
+            <meta name="twitter:card" content="player" />
+            <meta name="twitter:site" content="@AwaazEye" />
+            <meta name="twitter:title" content={incident.title} />
+            <meta name="twitter:description" content={incident.description} />
+            <meta name="twitter:image" content={firstThumbnail} />
+            <meta name="twitter:player" content={firstVideoItem} />
             <meta name="twitter:player:width" content="1280" />
             <meta name="twitter:player:height" content="720" />
-            <meta name="twitter:player:stream" content={firstVideo} />
+            <meta name="twitter:player:stream" content={firstVideoItem} />
             <meta name="twitter:player:stream:content_type" content="video/mp4" />
-            <meta name="twitter:image" content={firstThumbnail} />
           </>
         ) : (
           <>
-            <meta name="twitter:image" content={firstImage} />
+            <meta property="og:image" content={firstImageItem || fallbackImage} />
+            <meta property="og:image:secure_url" content={firstImageItem || fallbackImage} />
+            <meta property="og:image:type" content="image/jpeg" />
+            <meta property="og:image:width" content="1200" />
+            <meta property="og:image:height" content="630" />
+            
+            <meta name="twitter:card" content="summary_large_image" />
+            <meta name="twitter:image" content={firstImageItem || fallbackImage} />
             <meta name="twitter:image:alt" content={incident.title} />
           </>
         )}
+        
+        <meta property="og:image:alt" content={incident.title} />
+        <meta property="og:updated_time" content={new Date().toISOString()} />
 
+        {/* Microsoft Teams / Skype */}
+        <meta name="msapplication-TileImage" content={fallbackImage} />
+        <meta name="thumbnail" content={fallbackImage} />
+        
         {/* Additional Meta Tags for Better Social Media Support */}
         <meta property="article:published_time" content={new Date().toISOString()} />
+        <meta property="article:modified_time" content={new Date().toISOString()} />
         <meta property="article:author" content="Awaaz Eye" />
-        
-        {/* Microsoft Teams / Skype */}
-        <meta name="msapplication-TileImage" content={firstImage} />
-        <meta name="thumbnail" content={firstThumbnail || firstImage} />
 
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
         <style>
@@ -257,35 +247,65 @@ export default function IncidentPage({ initialData, error: serverError }) {
             }
           `}
         </style>
+        <meta name="timestamp" content={new Date().getTime()} />
       </Head>
 
       <div style={styles.pageContainer}>
         <div style={styles.contentWrapper}>
           <div style={styles.sliderContainer}>
-            <Slider {...sliderSettings}>
-              {incident.media.map((item, index) => (
-                <div key={index} className="media-slide">
-                  {item.endsWith(".mp4") ? (
-                    <div style={styles.mediaWrapper}>
-                      <video style={styles.video} controls>
-                        <source src={item} type="video/mp4" />
-                      </video>
+            {mediaItems.length > 0 && (
+              mediaItems.length <= 3 ? (
+                <div style={styles.staticMediaGrid}>
+                  {mediaItems.map((item, index) => (
+                    <div key={index} style={styles.staticMediaItem}>
+                      {getMediaType(item) === 'video' ? (
+                        <div style={styles.mediaWrapper}>
+                          <video style={styles.video} controls>
+                            <source src={item} type="video/mp4" />
+                          </video>
+                        </div>
+                      ) : (
+                        <div style={styles.mediaWrapper}>
+                          <Image
+                            src={item}
+                            alt={incident.title}
+                            width={400}
+                            height={300}
+                            style={styles.image}
+                            objectFit="cover"
+                          />
+                        </div>
+                      )}
                     </div>
-                  ) : (
-                    <div style={styles.mediaWrapper}>
-                      <Image
-                        src={item}
-                        alt={incident.title}
-                        width={400}
-                        height={300}
-                        style={styles.image}
-                        objectFit="cover"
-                      />
-                    </div>
-                  )}
+                  ))}
                 </div>
-              ))}
-            </Slider>
+              ) : (
+                <Slider {...sliderSettings}>
+                  {mediaItems.map((item, index) => (
+                    <div key={index} className="media-slide">
+                      {getMediaType(item) === 'video' ? (
+                        <div style={styles.mediaWrapper}>
+                          <video style={styles.video} controls>
+                            <source src={item} type="video/mp4" />
+                          </video>
+                        </div>
+                      ) : (
+                        <div style={styles.mediaWrapper}>
+                          <Image
+                            src={item}
+                            alt={incident.title}
+                            width={400}
+                            height={300}
+                            style={styles.image}
+                            objectFit="cover"
+                          />
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </Slider>
+              )
+            )}
           </div>
 
           <div style={styles.detailsContainer}>
@@ -327,6 +347,33 @@ const styles = {
     marginBottom: "1.5rem",
     boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.2)",
     backdropFilter: "blur(4px)",
+  },
+  staticMediaGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
+    gap: "20px",
+    justifyItems: "center",
+    alignItems: "center",
+    padding: "0 10px",
+    "@media (min-width: 1024px)": {
+      gridTemplateColumns: props => 
+        props.mediaCount === 1 ? "minmax(250px, 600px)" :
+        props.mediaCount === 2 ? "repeat(2, 1fr)" :
+        "repeat(3, 1fr)",
+    },
+    "@media (min-width: 601px) and (max-width: 1023px)": {
+      gridTemplateColumns: props => 
+        props.mediaCount === 1 ? "minmax(250px, 500px)" :
+        "repeat(2, 1fr)",
+    },
+    "@media (max-width: 600px)": {
+      gridTemplateColumns: "minmax(250px, 1fr)",
+    }
+  },
+  staticMediaItem: {
+    width: "100%",
+    maxWidth: "400px",
+    margin: "0 auto",
   },
   mediaWrapper: {
     position: "relative",
@@ -410,20 +457,31 @@ const styles = {
 };
 
 export async function getServerSideProps({ params, res }) {
-  // Set cache control headers
-  res.setHeader(
-    'Cache-Control',
-    'public, s-maxage=10, stale-while-revalidate=59'
-  );
+  if (params.id === 'favicon.ico') {
+    return { notFound: true };
+  }
 
+  // Set strict no-cache headers
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '-1');
+  res.setHeader('Surrogate-Control', 'no-store');
+  
   try {
-    const response = await axios.get(`https://awaazeye.com/api/v1/event-post/event/${params.id}`);
+    const response = await axios.get(`https://awaazeye.com/api/v1/event-post/event/${params.id}`, {
+      headers: {
+        'Cache-Control': 'no-cache',
+        'Pragma': 'no-cache',
+        'Cache-Control': 'no-store',
+        'Expires': '0'
+      }
+    });
     
     if (!response?.data?.body) {
       return {
-        props: {
-          error: true,
-          initialData: null
+        props: { 
+          error: true, 
+          initialData: null 
         }
       };
     }
@@ -433,15 +491,17 @@ export async function getServerSideProps({ params, res }) {
     return {
       props: {
         initialData: formattedData,
-        error: false
+        error: false,
+        timestamp: new Date().getTime() // Adding timestamp to force refresh
       }
     };
   } catch (error) {
     console.error('Server-side error fetching incident:', error);
     return {
-      props: {
-        error: true,
-        initialData: null
+      props: { 
+        error: true, 
+        initialData: null,
+        timestamp: new Date().getTime()
       }
     };
   }
