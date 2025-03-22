@@ -402,7 +402,7 @@ const styles = {
   video: {
     width: "100%",
     height: "100%",
-    objectFit: "cover",
+    objectFit: "",
     backgroundColor: "#000",
   },
   detailsContainer: {
