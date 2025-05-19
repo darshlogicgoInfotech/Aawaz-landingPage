@@ -16,7 +16,7 @@ export const createMetadata = ({
     title: `WalletSync - ${title}`,
     description,
     other,
-    metadataBase: new URL(process.env.NEXT_PUBLIC_URL),
+    metadataBase: "",
     // alternates: {
     //   canonical: canonical + "/",
     // },
