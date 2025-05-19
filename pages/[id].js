@@ -127,6 +127,7 @@ export default function IncidentPage() {
   const videoRefs = useRef([]);
   const [mutedStates, setMutedStates] = useState([]);
   const [fullscreenMedia, setFullscreenMedia] = useState(null);
+  console.log("jelllooo")
 
   useEffect(() => {
     if (incident?.media?.length > 0) {
