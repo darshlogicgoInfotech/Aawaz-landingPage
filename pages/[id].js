@@ -558,53 +558,53 @@ export default function IncidentPage() {
   );
 }
 
-// export async function getServerSideProps({ params, res }) {
-//   if (params.id === 'favicon.ico') {
-//     return { notFound: true };
-//   }
+export async function getServerSideProps({ params, res }) {
+  if (params.id === 'favicon.ico') {
+    return { notFound: true };
+  }
 
-//   // Set strict no-cache headers
-//   res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
-//   res.setHeader('Pragma', 'no-cache');
-//   res.setHeader('Expires', '-1');
-//   res.setHeader('Surrogate-Control', 'no-store');
+  // Set strict no-cache headers
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '-1');
+  res.setHeader('Surrogate-Control', 'no-store');
 
-//   try {
-//     const response = await axios.get(`https://awaazeye.com/api/v1/event-post/event/${params.id}`, {
-//       headers: {
-//         'Cache-Control': 'no-cache',
-//         'Pragma': 'no-cache',
-//         'Cache-Control': 'no-store',
-//         'Expires': '0'
-//       }
-//     });
+  try {
+    const response = await axios.get(`https://awaazeye.com/api/v1/event-post/event/${params.id}`, {
+      headers: {
+        'Cache-Control': 'no-cache',
+        'Pragma': 'no-cache',
+        'Cache-Control': 'no-store',
+        'Expires': '0'
+      }
+    });
 
-//     if (!response?.data?.body) {
-//       return {
-//         props: {
-//           error: true,
-//           initialData: null
-//         }
-//       };
-//     }
+    if (!response?.data?.body) {
+      return {
+        props: {
+          error: true,
+          initialData: null
+        }
+      };
+    }
 
-//     const formattedData = formatIncidentData(response.data.body);
+    const formattedData = formatIncidentData(response.data.body);
 
-//     return {
-//       props: {
-//         initialData: formattedData,
-//         error: false,
-//         timestamp: new Date().getTime() // Adding timestamp to force refresh
-//       }
-//     };
-//   } catch (error) {
-//     console.error('Server-side error fetching incident:', error);
-//     return {
-//       props: {
-//         error: true,
-//         initialData: null,
-//         timestamp: new Date().getTime()
-//       }
-//     };
-//   }
-// }
+    return {
+      props: {
+        initialData: formattedData,
+        error: false,
+        timestamp: new Date().getTime() // Adding timestamp to force refresh
+      }
+    };
+  } catch (error) {
+    console.error('Server-side error fetching incident:', error);
+    return {
+      props: {
+        error: true,
+        initialData: null,
+        timestamp: new Date().getTime()
+      }
+    };
+  }
+}
