@@ -1,10 +1,11 @@
-import { Images } from "@/data/images";
+// import { Image } from "@/data/Image";
 import moment from "moment";
+import Image from "next/image";
 
 export const createMetadata = ({
   title = "Budget Planner and Expense Tracker",
   description = "WalletSync offers a secure and user-friendly wallet web app to manage your digital assets effortlessly. Enjoy seamless transactions, advanced security features, and an intuitive interface for an enhanced financial experience.",
-  img = Images.main,
+  img = Image.main,
   siteName = "WalletSync - Budget Planner and Expense Tracker",
   type = "website",
 //   canonical = process.env.NEXT_PUBLIC_URL,
@@ -25,7 +26,7 @@ export const createMetadata = ({
       siteName,
       url,
       type,
-      images: img
+      Image: img
         ? [{ url: img, width: 1200, height: 630, alt: "Banner Image" }]
         : [],
     },
@@ -33,7 +34,7 @@ export const createMetadata = ({
       card: "summary_large_image",
       title,
       description,
-      images: img ? [img] : [],
+      Image: img ? [img] : [],
     },
     other: {
       "google-site-verification": "JTnXxz7fJRniJ3ckFGmY6Sa2PD0NfyxFmZbBykhS8dM", // ✅ Added Google verification meta
