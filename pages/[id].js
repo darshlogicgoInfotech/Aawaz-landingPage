@@ -23,6 +23,7 @@ import { MdVolumeUp } from "react-icons/md";
 import { MdVolumeOff } from "react-icons/md";
 import Home from ".";
 import { IoMdClose } from "react-icons/io";
+import { createMetadata } from "./commonMeta";
 
 // Helper function to format incident data
 function formatIncidentData(data) {
@@ -149,9 +150,8 @@ export default function IncidentPage() {
 
   return (
     <>
-      <Head>
+      {/* <Head>
         <title>{incident.title}</title>
-        {/* Cache Control Meta Tags */}
         <meta
           httpEquiv="Cache-Control"
           content="no-cache, no-store, must-revalidate"
@@ -159,11 +159,9 @@ export default function IncidentPage() {
         <meta httpEquiv="Pragma" content="no-cache" />
         <meta httpEquiv="Expires" content="0" />
 
-        {/* Basic Meta Tags */}
         <meta name="title" content={incident.title} />
         <meta name="description" content={incident.description} />
 
-        {/* Open Graph tags for link preview */}
         <meta property="og:type" content={hasVideo ? "video" : "article"} />
         <meta
           property="og:url"
@@ -175,7 +173,6 @@ export default function IncidentPage() {
 
         {hasVideo ? (
           <>
-            {/* Video preview meta tags */}
             <meta property="og:video" content={firstVideoItem} />
             <meta property="og:video:type" content="video/mp4" />
             <meta property="og:video:width" content="1280" />
@@ -185,7 +182,6 @@ export default function IncidentPage() {
             <meta property="og:image:height" content="720" />
             <meta property="og:image:alt" content={incident.title} />
 
-            {/* Twitter video card */}
             <meta name="twitter:card" content="player" />
             <meta name="twitter:site" content="@AwaazEye" />
             <meta name="twitter:title" content={incident.title} />
@@ -197,7 +193,6 @@ export default function IncidentPage() {
           </>
         ) : (
           <>
-            {/* Image preview meta tags */}
             <meta
               property="og:image"
               content={firstImageItem || fallbackImage}
@@ -206,7 +201,6 @@ export default function IncidentPage() {
             <meta property="og:image:height" content="630" />
             <meta property="og:image:alt" content={incident.title} />
 
-            {/* Twitter image card */}
             <meta name="twitter:card" content="summary_large_image" />
             <meta name="twitter:site" content="@AwaazEye" />
             <meta name="twitter:title" content={incident.title} />
@@ -218,14 +212,11 @@ export default function IncidentPage() {
           </>
         )}
 
-        {/* Microsoft Teams / Skype preview */}
         <meta name="msapplication-TileImage" content={fallbackImage} />
         <meta name="thumbnail" content={fallbackImage} />
 
-        {/* Force refresh for link preview */}
         <meta property="og:updated_time" content={new Date().toISOString()} />
 
-        {/* Additional Meta Tags for Better Social Media Support */}
         <meta
           property="article:published_time"
           content={new Date().toISOString()}
@@ -235,7 +226,57 @@ export default function IncidentPage() {
           content={new Date().toISOString()}
         />
         <meta property="article:author" content="Awaaz Eye" />
-      </Head>
+      </Head> */}
+      {incident && (
+        <Head>
+          {(() => {
+            const metadata = createMetadata({
+              title: incident.title,
+              description: incident.description,
+              img: fallbackImage,
+              type: hasVideo ? "video" : "article",
+              url: `https://news.awaazeye.com/${router.query.id}`,
+              siteName: "Awaaz Eye",
+            });
+
+            return (
+              <>
+                <title>{metadata.title}</title>
+                <meta name="description" content={metadata.description} />
+                <meta property="og:title" content={metadata.openGraph.title} />
+                <meta
+                  property="og:description"
+                  content={metadata.openGraph.description}
+                />
+                <meta property="og:type" content={metadata.openGraph.type} />
+                <meta property="og:url" content={metadata.openGraph.url} />
+                <meta
+                  property="og:site_name"
+                  content={metadata.openGraph.siteName}
+                />
+                {metadata.openGraph.images?.map((img, index) => (
+                  <meta key={index} property="og:image" content={img.url} />
+                ))}
+
+                <meta name="twitter:card" content={metadata.twitter.card} />
+                <meta name="twitter:title" content={metadata.twitter.title} />
+                <meta
+                  name="twitter:description"
+                  content={metadata.twitter.description}
+                />
+                {metadata.twitter.images?.map((img, index) => (
+                  <meta key={index} name="twitter:image" content={img} />
+                ))}
+
+                <meta
+                  name="google-site-verification"
+                  content={metadata.other["google-site-verification"]}
+                />
+              </>
+            );
+          })()}
+        </Head>
+      )}
 
       <div
         className={styles.mainBg}
