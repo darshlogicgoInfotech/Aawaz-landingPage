@@ -9,7 +9,7 @@ export const createMetadata = ({
   siteName = "WalletSync - Budget Planner and Expense Tracker",
   type = "website",
 //   canonical = process.env.NEXT_PUBLIC_URL,
-  url = process.env.NEXT_PUBLIC_URL, 
+  url = "", 
   ...other
 } = {}) => {
   return {
