@@ -23,7 +23,7 @@ import { MdVolumeUp } from "react-icons/md";
 import { MdVolumeOff } from "react-icons/md";
 import Home from ".";
 import { IoMdClose } from "react-icons/io";
-import { createMetadata } from "./commonMeta";
+import { createMetadata } from "../utils/commonMeta";
 
 // Helper function to format incident data
 function formatIncidentData(data) {
