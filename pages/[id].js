@@ -228,7 +228,7 @@ export default function IncidentPage() {
         />
         <meta property="article:author" content="Awaaz Eye" />
       </Head> */}
-      {/* {incident && (
+      {incident && (
         <Head>
           {(() => {
             const metadata = createMetadata({
@@ -277,7 +277,7 @@ export default function IncidentPage() {
             );
           })()}
         </Head>
-      )} */}
+      )}
 
       <div
         className={styles.mainBg}
