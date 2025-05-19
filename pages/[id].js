@@ -1,29 +1,46 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import Head from "next/head";
 import { useRouter } from "next/router";
-import Slider from "react-slick";
 import axios from "axios";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
+import incidents from "../data/incidents";
+import styles from "./IncidentPage.module.css";
+import { FaPlay } from "react-icons/fa6";
+import LocationImage from "../images/location.png";
+import FireImage from "../images/vector.png";
+import { BiCommentDetail } from "react-icons/bi";
+import { GoShareAndroid } from "react-icons/go";
+
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Pagination, Autoplay } from "swiper/modules";
+import "swiper/css";
+import "swiper/css/pagination";
+import { FaRegEye, FaVolumeMute, FaVolumeUp } from "react-icons/fa";
+import { FiMaximize } from "react-icons/fi";
+import { MdVolumeUp } from "react-icons/md";
+import { MdVolumeOff } from "react-icons/md";
+import Home from ".";
+import { IoMdClose } from "react-icons/io";
 
 // Helper function to format incident data
 function formatIncidentData(data) {
   if (!data) return null;
-  
+
   return {
     id: data._id,
     title: data.title,
     description: data.description,
-    date: new Date(data.eventTime).toLocaleDateString('en-US', {
-      day: 'numeric',
-      month: 'short'
+    date: new Date(data.eventTime).toLocaleDateString("en-US", {
+      day: "numeric",
+      month: "short",
     }),
     time: getTimeAgo(new Date(data.eventTime)),
     notified: data.notifiedUserCount,
-    media: data.attachments?.map(item => item.attachment) || [],
-    thumbnails: data.attachments?.map(item => item.thumbnail) || [],
-    mediaTypes: data.attachments?.map(item => item.attachmentFileType) || []
+    media: data.attachments?.map((item) => item.attachment) || [],
+    thumbnails: data.attachments?.map((item) => item.thumbnail) || [],
+    mediaTypes: data.attachments?.map((item) => item.attachmentFileType) || [],
   };
 }
 
@@ -44,121 +61,115 @@ function getTimeAgo(date) {
 
 // Update the helper function to get video poster
 function getVideoPoster(videoUrl) {
-  if (!videoUrl) return '';
-  return `https://awaazeye.com/api/v1/video-thumbnail?url=${encodeURIComponent(videoUrl)}`;
+  if (!videoUrl) return "";
+  return `https://awaazeye.com/api/v1/video-thumbnail?url=${encodeURIComponent(
+    videoUrl
+  )}`;
 }
 
-export default function IncidentPage({ initialData, error: serverError }) {
+const getMediaType = (url) => {
+  if (!url) return null;
+  if (url.toLowerCase().endsWith(".mp4")) return "video";
+  if (url.toLowerCase().match(/\.(jpg|jpeg|png|gif|webp)$/)) return "image";
+  return null;
+};
+
+export default function IncidentPage() {
   const router = useRouter();
-  const [incident, setIncident] = useState(initialData);
-  const [loading, setLoading] = useState(!initialData);
-  const [error, setError] = useState(serverError);
+  const { id } = router.query;
 
-  useEffect(() => {
-    if (!router.query.id || initialData) return;
+  // State for main incident
+  const [incident, setIncident] = useState(null);
+  // State for nearby events
+  const [nearbyEvents, setNearbyEvents] = useState([]);
+  // Loading and error states (optional)
+  const [loading, setLoading] = useState(true);
+  console.log("incident >>>>>>>>>", incident);
+  const mediaItems =
+    incident?.attachments?.map((item) => item.attachment) || [];
+  const thumbnails = incident?.attachments?.map((item) => item.thumbnail) || [];
 
-    const fetchIncidentData = async () => {
-      try {
-        setLoading(true);
-        setError(false);
-        const response = await axios.get(`https://awaazeye.com/api/v1/event-post/event/${router.query.id}`);
-        
-        if (!response?.data?.body) {
-          setError(true);
-          return;
-        }
-
-        const formattedData = formatIncidentData(response.data.body);
-        setIncident(formattedData);
-      } catch (error) {
-        setError(true);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchIncidentData();
-  }, [router.query.id, initialData]);
-
-  if (loading || error || !incident || !router.query.id) {
-    return (
-      <div style={{
-        minHeight: "100vh",
-        background: "linear-gradient(135deg, #000000, #1a1a1a)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        color: "white",
-        fontFamily: "Inter, sans-serif"
-      }}>
-        <h1>News Not Found!!</h1>
-      </div>
-    );
-  }
-
-  const sliderSettings = {
-    infinite: true,
-    slidesToShow: 3,
-    slidesToScroll: 1,
-    autoplay: true,
-    autoplaySpeed: 3000,
-    dots: true,
-    arrows: false,
-    responsive: [
-      {
-        breakpoint: 1024,
-        settings: {
-          slidesToShow: 2,
-          dots: true,
-        },
-      },
-      {
-        breakpoint: 600,
-        settings: {
-          slidesToShow: 1,
-          dots: true,
-        },
-      },
-    ],
-  };
-
-  // Improved media type detection
-  const getMediaType = (url) => {
-    if (!url) return null;
-    if (url.toLowerCase().endsWith('.mp4')) return 'video';
-    if (url.toLowerCase().match(/\.(jpg|jpeg|png|gif|webp)$/)) return 'image';
-    return null;
-  };
-
-  // Safe media checks
-  const mediaItems = incident?.media || [];
-  const thumbnails = incident?.thumbnails || [];
-  
-  const firstVideoItem = mediaItems.find(url => getMediaType(url) === 'video');
-  const firstImageItem = mediaItems.find(url => getMediaType(url) === 'image');
+  const firstVideoItem = mediaItems.find(
+    (url) => getMediaType(url) === "video"
+  );
+  const firstImageItem = mediaItems.find(
+    (url) => getMediaType(url) === "image"
+  );
   const firstThumbnail = thumbnails[0];
-  const videoPoster = firstVideoItem ? getVideoPoster(firstVideoItem) : '';
-  const fallbackImage = firstThumbnail || videoPoster || firstImageItem || '';
+  const videoPoster = firstVideoItem
+    ? `https://awaazeye.com/api/v1/video-thumbnail?url=${encodeURIComponent(
+        firstVideoItem
+      )}`
+    : "";
+  const fallbackImage = firstThumbnail || videoPoster || firstImageItem || "";
 
   const hasVideo = !!firstVideoItem;
+
+  useEffect(() => {
+    if (!id) return;
+    setLoading(true);
+    // Fetch main incident
+    axios
+      .get(`https://awaazeye.com/api/v1/event-post/event/${id}`)
+      .then((res) => setIncident(res.data.body))
+      .catch(() => setIncident(null));
+
+    // Fetch nearby events
+    axios
+      .get(`https://awaazeye.com/api/v1/event-post/other-nearby-events/${id}`)
+      .then((res) => setNearbyEvents(res.data.body || []))
+      .catch(() => setNearbyEvents([]))
+      .finally(() => setLoading(false));
+  }, [id]);
+
+  const [currentBg, setCurrentBg] = useState(incident?.media?.[0] || null);
+  const videoRefs = useRef([]);
+  const [mutedStates, setMutedStates] = useState([]);
+  const [fullscreenMedia, setFullscreenMedia] = useState(null);
+
+  useEffect(() => {
+    if (incident?.media?.length > 0) {
+      setMutedStates(Array(incident.media.length).fill(true));
+    }
+  }, [incident]);
+
+  if (loading) return <div>Loading...</div>;
+  if (!incident) return <Home />;
+
+  const handlePlayClick = (item) => {
+    const matched = incident.attachments.find(
+      (att) => att.attachmentId === item.attachmentId
+    );
+    console.log("matched >>>>>>>>>", matched.attachment);
+    if (matched) setFullscreenMedia(matched);
+  };
+
+  const handleCardClick = (id) => {
+    router.push(`/${id}`);
+  };
 
   return (
     <>
       <Head>
         <title>{incident.title}</title>
-        
         {/* Cache Control Meta Tags */}
-        <meta httpEquiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+        <meta
+          httpEquiv="Cache-Control"
+          content="no-cache, no-store, must-revalidate"
+        />
         <meta httpEquiv="Pragma" content="no-cache" />
         <meta httpEquiv="Expires" content="0" />
-        
+
         {/* Basic Meta Tags */}
         <meta name="title" content={incident.title} />
         <meta name="description" content={incident.description} />
-        
-        {/* Essential Open Graph tags for link preview */}
+
+        {/* Open Graph tags for link preview */}
         <meta property="og:type" content={hasVideo ? "video" : "article"} />
-        <meta property="og:url" content={`https://news.awaazeye.com/${router.query.id}`} />
+        <meta
+          property="og:url"
+          content={`https://news.awaazeye.com/${router.query.id}`}
+        />
         <meta property="og:title" content={incident.title} />
         <meta property="og:description" content={incident.description} />
         <meta property="og:site_name" content="Awaaz Eye" />
@@ -174,7 +185,7 @@ export default function IncidentPage({ initialData, error: serverError }) {
             <meta property="og:image:width" content="1280" />
             <meta property="og:image:height" content="720" />
             <meta property="og:image:alt" content={incident.title} />
-            
+
             {/* Twitter video card */}
             <meta name="twitter:card" content="player" />
             <meta name="twitter:site" content="@AwaazEye" />
@@ -188,17 +199,23 @@ export default function IncidentPage({ initialData, error: serverError }) {
         ) : (
           <>
             {/* Image preview meta tags */}
-            <meta property="og:image" content={firstImageItem || fallbackImage} />
+            <meta
+              property="og:image"
+              content={firstImageItem || fallbackImage}
+            />
             <meta property="og:image:width" content="1200" />
             <meta property="og:image:height" content="630" />
             <meta property="og:image:alt" content={incident.title} />
-            
+
             {/* Twitter image card */}
             <meta name="twitter:card" content="summary_large_image" />
             <meta name="twitter:site" content="@AwaazEye" />
             <meta name="twitter:title" content={incident.title} />
             <meta name="twitter:description" content={incident.description} />
-            <meta name="twitter:image" content={firstImageItem || fallbackImage} />
+            <meta
+              name="twitter:image"
+              content={firstImageItem || fallbackImage}
+            />
           </>
         )}
 
@@ -210,133 +227,330 @@ export default function IncidentPage({ initialData, error: serverError }) {
         <meta property="og:updated_time" content={new Date().toISOString()} />
 
         {/* Additional Meta Tags for Better Social Media Support */}
-        <meta property="article:published_time" content={new Date().toISOString()} />
-        <meta property="article:modified_time" content={new Date().toISOString()} />
+        <meta
+          property="article:published_time"
+          content={new Date().toISOString()}
+        />
+        <meta
+          property="article:modified_time"
+          content={new Date().toISOString()}
+        />
         <meta property="article:author" content="Awaaz Eye" />
-
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-        <style>
-          {`
-            .slick-dots {
-              bottom: -35px;
-            }
-            .slick-dots li button:before {
-              color: white !important;
-              opacity: 0.4;
-              font-size: 10px;
-              line-height: 12px;
-              width: 12px;
-              height: 12px;
-            }
-            .slick-dots li.slick-active button:before {
-              color: white !important;
-              opacity: 1;
-            }
-            .media-slide {
-              padding: 0 10px;
-              aspect-ratio: 16/9;
-              max-width: 500px;
-              margin: 0 auto;
-            }
-            .slick-track {
-              display: flex !important;
-              align-items: center !important;
-            }
-            .slick-slide {
-              margin: 0 5px;
-              height: auto !important;
-            }
-            .slick-slide > div {
-              height: 100%;
-              display: flex;
-              align-items: center;
-              justify-content: center;
-            }
-          `}
-        </style>
-        <meta name="timestamp" content={new Date().getTime()} />
       </Head>
+      <div
+        className={styles.mainBg}
+        style={{
+          backgroundImage: currentBg ? `url(${currentBg})` : "none",
+        }}
+      >
+        <div className={styles.centerContent}>
+          <div className={styles.stickyHeader}>{incident?.address}</div>
+          {/* Slider */}
+          <div className={styles.sliderBox}>
+            <Swiper
+              modules={[Pagination, Autoplay]}
+              pagination={{ clickable: true }}
+              spaceBetween={20}
+              slidesPerView={1}
+              onSlideChange={(swiper) =>
+                setCurrentBg(
+                  incident?.attachments?.[swiper.activeIndex]?.attachment ||
+                    null
+                )
+              }
+              autoplay={{
+                delay: 3000,
+                disableOnInteraction: false,
+              }}
+              loop={true}
+            >
+              {incident.attachments?.map((item, idx) => (
+                <SwiperSlide key={idx}>
+                  <div className={styles.sliderMedia}>
+                    {/* Overlay for views */}
+                    <div className={styles.sliderViewsOverlay}>
+                      <span className={styles.viewsIcon}>
+                        <FaRegEye />
+                      </span>
+                      <span className={styles.viewsText}>
+                        {incident.viewCounts} views
+                      </span>
+                    </div>
+                    {item.attachmentFileType === "Video" ? (
+                      <div className={styles.videoWrapper}>
+                        <video
+                          className={styles.sliderImg}
+                          src={item.attachment}
+                          autoPlay
+                          muted
+                          loop
+                          playsInline
+                          ref={(el) => (videoRefs.current[idx] = el)}
+                        />
 
-      <div style={styles.pageContainer}>
-        <div style={styles.contentWrapper}>
-          <div style={styles.sliderContainer}>
-            {mediaItems.length > 0 && (
-              mediaItems.length <= 3 ? (
-                <div style={styles.staticMediaGrid}>
-                  {mediaItems.map((item, index) => (
-                    <div key={index} style={styles.staticMediaItem}>
-                      {getMediaType(item) === 'video' ? (
-                        <div style={styles.mediaWrapper}>
-                          <video 
-                            style={styles.video}
-                            controls
-                            playsInline
-                            preload="auto"
-                          >
-                            <source src={item} type="video/mp4" />
-                          </video>
-                        </div>
-                      ) : (
-                        <div style={styles.mediaWrapper}>
-                          <Image
-                            src={item}
-                            alt={incident.title}
-                            width={400}
-                            height={225}
-                            layout="responsive"
-                            objectFit="fill"
-                            priority
-                          />
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <Slider {...sliderSettings}>
-                  {mediaItems.map((item, index) => (
-                    <div key={index} className="media-slide">
-                      {getMediaType(item) === 'video' ? (
-                        <div style={styles.mediaWrapper}>
-                          <video 
-                            style={styles.video}
-                            controls
-                            playsInline
-                            preload="auto"
-                          >
-                            <source src={item} type="video/mp4" />
-                          </video>
-                        </div>
-                      ) : (
-                        <div style={styles.mediaWrapper}>
-                          <Image
-                            src={item}
-                            alt={incident.title}
-                            width={400}
-                            height={225}
-                            layout="responsive"
-                            objectFit="fill"
-                            priority
-                          />
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </Slider>
-              )
-            )}
+                        {/* Fullscreen Button */}
+                        <button
+                          className={styles.fullscreenBtn}
+                          onClick={() => {
+                            const video = videoRefs.current[idx];
+                            if (video?.requestFullscreen) {
+                              video.requestFullscreen();
+                            } else if (video?.webkitRequestFullscreen) {
+                              video.webkitRequestFullscreen();
+                            } else if (video?.msRequestFullscreen) {
+                              video.msRequestFullscreen();
+                            }
+                          }}
+                        >
+                          <FiMaximize color="white" size={18} />
+                        </button>
+
+                        {/* Mute/Unmute Button */}
+                        <button
+                          className={styles.muteBtn}
+                          onClick={() => {
+                            const video = videoRefs.current[idx];
+                            if (video) {
+                              const newMuted = !video.muted;
+                              video.muted = newMuted;
+
+                              setMutedStates((prev) => {
+                                const updated = [...prev];
+                                updated[idx] = newMuted;
+                                return updated;
+                              });
+                            }
+                          }}
+                        >
+                          {videoRefs.current[idx]?.muted ?? true ? (
+                            <MdVolumeOff color="white" size={18} />
+                          ) : (
+                            <MdVolumeUp color="white" size={18} />
+                          )}
+                        </button>
+                      </div>
+                    ) : (
+                      <img
+                        className={styles.sliderImg}
+                        src={item.attachment}
+                        alt="media"
+                      />
+                    )}
+                  </div>
+                </SwiperSlide>
+              ))}
+            </Swiper>
+            <div className={styles.sliderOverlay}></div>
           </div>
 
-          <div style={styles.detailsContainer}>
-            <div style={styles.metaInfo}>
-              <span style={styles.metaItem}>{incident.date}</span>
-              <span style={styles.metaDot}>•</span>
-              <span style={styles.metaItem}>{incident.time}</span>
-              <span style={styles.metaDot}>|</span>
-              <span style={styles.notifiedCount}>{incident.notified} Notified</span>
+          {/* Meta info */}
+          <div className={styles.metaRow}>
+            {incident?.distance && (
+              <>
+                <span>{incident?.distance}</span>
+                <span className={styles.dot}>•</span>
+              </>
+            )}
+            {incident?.eventTime && (
+              <>
+                <span>
+                  {incident?.eventTime
+                    ? new Date(incident.eventTime).toLocaleString("en-US", {
+                        month: "short",
+                        day: "numeric",
+                      })
+                    : ""}
+                </span>
+                <span className={styles.dot}>•</span>
+                {/* Time ago */}
+                <span>
+                  {incident?.eventTime
+                    ? getTimeAgo(new Date(incident.eventTime)) + " ago"
+                    : ""}
+                </span>
+              </>
+            )}
+          </div>
+          <span className={styles.notified}>
+            {incident?.notifiedUserCount ? incident?.notifiedUserCount : 0}{" "}
+            Notified
+          </span>
+
+          {/* Title & Description */}
+          <div>
+            <div className={styles.titleRow}>
+              {incident?.title ? incident?.title : "No Title"}
             </div>
-            <h1 style={styles.title}>{incident.title}</h1>
-            <p style={styles.description}>{incident.description}</p>
+            <div className={styles.descRow}>
+              {incident?.description ? incident?.description : "No Description"}
+            </div>
+          </div>
+
+          <div className={styles.incidentActions}>
+            <Image
+              src={LocationImage}
+              className={styles.actionIconImage}
+              alt="location"
+            />
+            <div className={styles.actionIcon}>
+              <Image src={FireImage} alt="reaction" />
+            </div>
+            <div className={styles.actionText}>
+              {incident?.reactionCounts ? incident?.reactionCounts : 0}
+            </div>
+            <div className={styles.actionIcon}>
+              <BiCommentDetail color="white" />
+            </div>
+            <div className={styles.actionText}>
+              {incident?.commentCounts ? incident?.commentCounts : 0}
+            </div>
+            <div className={styles.actionIcon}>
+              <GoShareAndroid color="white" />
+            </div>
+          </div>
+
+          {fullscreenMedia && (
+            <div className={styles.fullscreenOverlayCustom}>
+              <div className={styles.fullscreenMediaCenter}>
+                {fullscreenMedia.attachmentFileType === "Video" ? (
+                  <video
+                    src={fullscreenMedia.attachment}
+                    className={styles.fullscreenMedia}
+                    autoPlay
+                    loop
+                    muted={fullscreenMedia.muted}
+                    ref={(el) => (fullscreenMedia.videoRef = el)}
+                  />
+                ) : (
+                  <img
+                    src={fullscreenMedia.attachment}
+                    className={styles.fullscreenMedia}
+                    alt="media"
+                  />
+                )}
+                {/* Close Button */}
+                <button
+                  className={styles.fullscreenCloseBtn}
+                  onClick={() => setFullscreenMedia(null)}
+                >
+                  ×
+                </button>
+                {/* Mute/Unmute Button */}
+                {fullscreenMedia.attachmentFileType === "Video" && (
+                  <button
+                    className={styles.fullscreenMuteBtn}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      const video = document.querySelector(
+                        `.${styles.fullscreenMedia}`
+                      );
+                      if (video) {
+                        video.muted = !video.muted;
+                        setFullscreenMedia({
+                          ...fullscreenMedia,
+                          muted: video.muted,
+                        });
+                      }
+                    }}
+                  >
+                    {fullscreenMedia.muted ? (
+                      <MdVolumeOff color="white" size={22} />
+                    ) : (
+                      <MdVolumeUp color="white" size={22} />
+                    )}
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Timeline */}
+          {incident?.timeLines && incident.timeLines.length > 0 ? (
+            <>
+              <div className={styles.timelineTitle}>Timeline</div>
+              <div className={styles.timelineList}>
+                {incident.timeLines?.map((item, idx) => (
+                  <div className={styles.timelineItem} key={idx}>
+                    {item?.eventTime && (
+                      <div className={styles.timelineTime}>
+                        <span>
+                          {new Date(item.eventTime).toLocaleTimeString([], {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
+                        </span>
+                        <span
+                          className={styles.playIcon}
+                          onClick={() => handlePlayClick(item)}
+                        >
+                          <FaPlay size={12} color="#FFFFFF" />
+                        </span>
+                      </div>
+                    )}{" "}
+                    : (<></>)
+                    {item.description && (
+                      <div className={styles.timelineDesc}>
+                        {item?.description ? item.description : ""}
+                      </div>
+                    )}
+                    <div className={styles.timelineDot}></div>
+                    <div className={styles.timelineVert} />
+                    <div className={styles.timelineDotBottom}></div>
+                  </div>
+                ))}
+              </div>
+            </>
+          ) : (
+            <></>
+          )}
+
+          {/* In this area */}
+          <div className={styles.areaTitle}>In this area</div>
+          <div className={styles.areaList}>
+            {nearbyEvents.length > 0 ? (
+              nearbyEvents.map((card, idx) => (
+                <div
+                  className={styles.areaCard}
+                  key={card._id}
+                  onClick={() => handleCardClick(card._id)}
+                >
+                  <div className={styles.areaCardLeft}>
+                    <div className={styles.areaMetaRow}>
+                      <span>{card.distance}</span>
+                      <span className={styles.dot}>•</span>
+                      <span>
+                        {incident?.eventTime
+                          ? getTimeAgo(new Date(incident.eventTime)) + " ago"
+                          : ""}
+                      </span>
+                    </div>
+                    <div className={styles.areaCardTitle}>{card.title}</div>
+                    <div className={styles.areaCardDesc}>
+                      {card.description}
+                    </div>
+                  </div>
+                  <div className={styles.areaCardImgWrap}>
+                    {card.attachmentFileType === "Video" ? (
+                      <video
+                        className={styles.areaCardImg}
+                        src={card.attachment}
+                        controls
+                      />
+                    ) : (
+                      <img
+                        className={styles.areaCardImg}
+                        src={card.attachment}
+                        alt="area"
+                      />
+                    )}
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className={styles.noNearbyEvents}>
+                No nearby events found.
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -344,183 +558,53 @@ export default function IncidentPage({ initialData, error: serverError }) {
   );
 }
 
-const styles = {
-  pageContainer: {
-    minHeight: "100vh",
-    background: "linear-gradient(135deg, #000000, #1a1a1a)",
-    color: "white",
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    padding: "2rem 1rem",
-  },
-  contentWrapper: {
-    width: "100%",
-    maxWidth: "1200px",
-    margin: "0 auto",
-  },
-  sliderContainer: {
-    background: "rgba(255, 255, 255, 0.05)",
-    borderRadius: "16px",
-    padding: "1rem",
-    marginBottom: "1.5rem",
-    boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.2)",
-    backdropFilter: "blur(4px)",
-  },
-  staticMediaGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
-    gap: "20px",
-    justifyItems: "center",
-    alignItems: "center",
-    padding: "0 10px",
-    "@media (min-width: 1024px)": {
-      gridTemplateColumns: props => 
-        props.mediaCount === 1 ? "minmax(250px, 600px)" :
-        props.mediaCount === 2 ? "repeat(2, 1fr)" :
-        "repeat(3, 1fr)",
-    },
-    "@media (min-width: 601px) and (max-width: 1023px)": {
-      gridTemplateColumns: props => 
-        props.mediaCount === 1 ? "minmax(250px, 500px)" :
-        "repeat(2, 1fr)",
-    },
-    "@media (max-width: 600px)": {
-      gridTemplateColumns: "minmax(250px, 1fr)",
-    }
-  },
-  staticMediaItem: {
-    width: "100%",
-    maxWidth: "500px",
-    margin: "0 auto",
-  },
-  mediaWrapper: {
-    position: "relative",
-    width: "100%",
-    maxWidth: "500px",
-    aspectRatio: "16/9",
-    borderRadius: "12px",
-    overflow: "hidden",
-    border: "3px solid rgba(255, 255, 255, 0.1)",
-    boxShadow: "0 4px 20px rgba(0, 0, 0, 0.3)",
-    margin: "0 auto",
-    background: "rgba(0, 0, 0, 0.1)",
-  },
-  image: {
-    width: "100%",
-    height: "100%",
-    objectFit: "contain",
-    display: "block",
-  },
-  video: {
-    width: "100%",
-    height: "100%",
-    objectFit: "contain",
-    display: "block",
-    backgroundColor: "transparent",
-  },
-  detailsContainer: {
-    marginTop: "1rem",
-    textAlign: "center",
-    background: "rgba(255, 255, 255, 0.05)",
-    borderRadius: "16px",
-    padding: "1.5rem",
-    boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.2)",
-    backdropFilter: "blur(4px)",
-  },
-  metaInfo: {
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    flexWrap: "wrap",
-    gap: "0.5rem",
-    marginBottom: "1.5rem",
-    padding: "1rem",
-    background: "rgba(0, 0, 0, 0.2)",
-    borderRadius: "12px",
-  },
-  metaItem: {
-    color: "#e2e8f0",
-    fontSize: "0.95rem",
-    fontFamily: "Inter, sans-serif",
-    fontWeight: "500",
-  },
-  metaDot: {
-    color: "#4a5568",
-    margin: "0 0.5rem",
-  },
-  notifiedCount: {
-    color: "#48bb78",
-    fontSize: "0.95rem",
-    fontFamily: "Inter, sans-serif",
-    fontWeight: "600",
-  },
-  title: {
-    fontSize: "2rem",
-    fontWeight: "700",
-    marginBottom: "1rem",
-    fontFamily: "Inter, sans-serif",
-    color: "#ffffff",
-    letterSpacing: "-0.5px",
-  },
-  description: {
-    color: "#e2e8f0",
-    fontSize: "1.1rem",
-    lineHeight: "1.7",
-    fontFamily: "Inter, sans-serif",
-    fontWeight: "400",
-    maxWidth: "800px",
-    margin: "0 auto",
-  },
-};
+// export async function getServerSideProps({ params, res }) {
+//   if (params.id === 'favicon.ico') {
+//     return { notFound: true };
+//   }
 
-export async function getServerSideProps({ params, res }) {
-  if (params.id === 'favicon.ico') {
-    return { notFound: true };
-  }
+//   // Set strict no-cache headers
+//   res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
+//   res.setHeader('Pragma', 'no-cache');
+//   res.setHeader('Expires', '-1');
+//   res.setHeader('Surrogate-Control', 'no-store');
 
-  // Set strict no-cache headers
-  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
-  res.setHeader('Pragma', 'no-cache');
-  res.setHeader('Expires', '-1');
-  res.setHeader('Surrogate-Control', 'no-store');
-  
-  try {
-    const response = await axios.get(`https://awaazeye.com/api/v1/event-post/event/${params.id}`, {
-      headers: {
-        'Cache-Control': 'no-cache',
-        'Pragma': 'no-cache',
-        'Cache-Control': 'no-store',
-        'Expires': '0'
-      }
-    });
-    
-    if (!response?.data?.body) {
-      return {
-        props: { 
-          error: true, 
-          initialData: null 
-        }
-      };
-    }
+//   try {
+//     const response = await axios.get(`https://awaazeye.com/api/v1/event-post/event/${params.id}`, {
+//       headers: {
+//         'Cache-Control': 'no-cache',
+//         'Pragma': 'no-cache',
+//         'Cache-Control': 'no-store',
+//         'Expires': '0'
+//       }
+//     });
 
-    const formattedData = formatIncidentData(response.data.body);
+//     if (!response?.data?.body) {
+//       return {
+//         props: {
+//           error: true,
+//           initialData: null
+//         }
+//       };
+//     }
 
-    return {
-      props: {
-        initialData: formattedData,
-        error: false,
-        timestamp: new Date().getTime() // Adding timestamp to force refresh
-      }
-    };
-  } catch (error) {
-    console.error('Server-side error fetching incident:', error);
-    return {
-      props: { 
-        error: true, 
-        initialData: null,
-        timestamp: new Date().getTime()
-      }
-    };
-  }
-}
+//     const formattedData = formatIncidentData(response.data.body);
+
+//     return {
+//       props: {
+//         initialData: formattedData,
+//         error: false,
+//         timestamp: new Date().getTime() // Adding timestamp to force refresh
+//       }
+//     };
+//   } catch (error) {
+//     console.error('Server-side error fetching incident:', error);
+//     return {
+//       props: {
+//         error: true,
+//         initialData: null,
+//         timestamp: new Date().getTime()
+//       }
+//     };
+//   }
+// }
