@@ -524,12 +524,12 @@
 
 @media (max-width: 600px) {
   .incidentActions {
-    top: 310px;
+    top: 350px;
     /* Lower for mobile */
     /* right: 38px; */
     /* Always stick to right edge */
     gap: 10px;
-    right: calc(50vw - 200px + 58px);
+    right: calc(50vw - 240px + 58px);
   }
 
   .actionIcon {

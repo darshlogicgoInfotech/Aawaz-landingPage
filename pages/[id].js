@@ -160,9 +160,21 @@ export default function IncidentPage({ initialData, error: serverError }) {
     siteName: "Awaaz Eye",
   });
 
-
   return (
     <>
+      <Head>
+        <title>{incident?.title || "Awaaz Eye Incident"}</title>
+        <meta property="og:title" content={incident?.title || "Awaaz Eye Incident"} />
+        <meta property="og:description" content={incident?.description || "Incident details and updates from Awaaz Eye."} />
+        <meta property="og:image" content={firstImageItem || fallbackImage || "https://guardianshot.blr1.cdn.digitaloceanspaces.com/eagleEye/event-type/1739334564445.png"} />
+        <meta property="og:url" content={`https://aawaz-landingpage.onrender.com/${id}`} />
+        <meta property="og:type" content={hasVideo ? "video.other" : "article"} />
+        <meta name="twitter:card" content={hasVideo ? "player" : "summary_large_image"} />
+        <meta name="twitter:title" content={incident?.title || "Awaaz Eye Incident"} />
+        <meta name="twitter:description" content={incident?.description || "Incident details and updates from Awaaz Eye."} />
+        <meta name="twitter:image" content={firstImageItem || fallbackImage || "https://guardianshot.blr1.cdn.digitaloceanspaces.com/eagleEye/event-type/1739334564445.png"} />
+      </Head>
+
       <NextSeo
         title={initialData?.title || "Awaaz Eye Incident"}
         description={initialData?.description || "Incident details and updates from Awaaz Eye."}
