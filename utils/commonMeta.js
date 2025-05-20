@@ -12,8 +12,9 @@ export const createMetadata = ({
   url = "", 
   ...other
 } = {}) => {
+
   return {
-    title: `WalletSync - ${title}`,
+    title: `Aawaz - ${title}`,
     description,
     other,
     metadataBase: "",
