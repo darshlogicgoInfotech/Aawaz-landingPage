@@ -108,12 +108,35 @@ export default function IncidentPage({ initialData, error: serverError }) {
     }
   }, [incident]);
 
-  if (loading)
+  if (loading) {
     return (
-      <div className={styles.loaderOverlay}>
-        <div className={styles.loader}></div>
-      </div>
+      <>
+        <Head>
+          <title>{initialData?.title || "Awaaz Eye Incident"}</title>
+          <meta property="og:title" content={initialData?.title || "Awaaz Eye Incident"} />
+          <meta property="og:description" content={initialData?.description || "Incident details and updates from Awaaz Eye."} />
+          <meta property="og:image" content={
+            (initialData?.attachments?.[0]?.thumbnail ||
+              initialData?.attachments?.[0]?.attachment ||
+              "https://guardianshot.blr1.cdn.digitaloceanspaces.com/eagleEye/event-type/1739334564445.png")
+          } />
+          <meta property="og:url" content={`https://aawaz-landingpage.onrender.com/${id}`} />
+          <meta property="og:type" content="article" />
+          <meta name="twitter:card" content="summary_large_image" />
+          <meta name="twitter:title" content={initialData?.title || "Awaaz Eye Incident"} />
+          <meta name="twitter:description" content={initialData?.description || "Incident details and updates from Awaaz Eye."} />
+          <meta name="twitter:image" content={
+            (initialData?.attachments?.[0]?.thumbnail ||
+              initialData?.attachments?.[0]?.attachment ||
+              "https://guardianshot.blr1.cdn.digitaloceanspaces.com/eagleEye/event-type/1739334564445.png")
+          } />
+        </Head>
+        <div className={styles.loaderOverlay}>
+          <div className={styles.loader}></div>
+        </div>
+      </>
     );
+  }
 
   if (!incident) return <Home />;
 
@@ -162,7 +185,6 @@ export default function IncidentPage({ initialData, error: serverError }) {
   
   return (
     <>
-    
       <Head>
         <title>{incident?.title || "Awaaz Eye Incident"}</title>
         <meta property="og:title" content={incident?.title || "Awaaz Eye Incident"} />
