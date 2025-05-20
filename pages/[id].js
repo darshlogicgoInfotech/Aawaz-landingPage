@@ -159,9 +159,10 @@ export default function IncidentPage({ initialData, error: serverError }) {
     url: `https://news.awaazeye.com/${id}`,
     siteName: "Awaaz Eye",
   });
-
+  
   return (
     <>
+    
       <Head>
         <title>{incident?.title || "Awaaz Eye Incident"}</title>
         <meta property="og:title" content={incident?.title || "Awaaz Eye Incident"} />
