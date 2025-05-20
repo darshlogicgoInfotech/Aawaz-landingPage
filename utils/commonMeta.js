@@ -13,6 +13,7 @@ export const createMetadata = ({
   ...other
 } = {}) => {
 
+  console.log("Image URL:", img)
   return {
     title: `Aawaz - ${title}`,
     description,
