@@ -149,9 +149,18 @@ export default function IncidentPage({ initialData, error: serverError }) {
 
   const hasVideo = !!firstVideoItem;
 
+  const metadata = createMetadata({
+    title: incident.title || "Incident Report",
+    description: incident.description || "View details about this incident",
+    img: fallbackImage,
+    type: hasVideo ? "video.other" : "article",
+    url: `https://news.awaazeye.com/${id}`,
+    siteName: "Awaaz Eye",
+  });
+
   return (
     <>
-      <Head>
+      {/* <Head>
         <title>{incident.title}</title>
         <meta
           httpEquiv="Cache-Control"
@@ -227,57 +236,57 @@ export default function IncidentPage({ initialData, error: serverError }) {
           content={new Date().toISOString()}
         />
         <meta property="article:author" content="Awaaz Eye" />
+      </Head> */}
+
+<Head>
+        {/* Use the generated metadata */}
+        <title>{metadata.title}</title>
+        <meta name="description" content={metadata.description} />
+        
+        {/* Open Graph / Facebook */}
+        <meta property="og:type" content={metadata.openGraph.type} />
+        <meta property="og:url" content={metadata.openGraph.url} />
+        <meta property="og:title" content={metadata.openGraph.title} />
+        <meta property="og:description" content={metadata.openGraph.description} />
+        <meta property="og:site_name" content={metadata.openGraph.siteName} />
+        
+        {/* Twitter */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:site" content="@AwaazEye" />
+        <meta name="twitter:title" content={metadata.openGraph.title} />
+        <meta name="twitter:description" content={metadata.openGraph.description} />
+        
+        {/* Media */}
+        {hasVideo && (
+          <>
+            <meta property="og:video" content={firstVideoItem} />
+            <meta property="og:video:secure_url" content={firstVideoItem} />
+            <meta property="og:video:type" content="video/mp4" />
+            <meta property="og:video:width" content="1280" />
+            <meta property="og:video:height" content="720" />
+            <meta name="twitter:card" content="player" />
+            <meta name="twitter:player" content={firstVideoItem} />
+            <meta name="twitter:player:width" content="1280" />
+            <meta name="twitter:player:height" content="720" />
+          </>
+        )}
+        
+        {/* Always include image fallback */}
+        <meta property="og:image" content={fallbackImage} />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta name="twitter:image" content={fallbackImage} />
+        
+        {/* Additional important tags */}
+        <meta property="og:updated_time" content={new Date().toISOString()} />
+        <meta name="msapplication-TileImage" content={fallbackImage} />
+        <meta name="thumbnail" content={fallbackImage} />
+        
+        {/* Cache control */}
+        <meta httpEquiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+        <meta httpEquiv="Pragma" content="no-cache" />
+        <meta httpEquiv="Expires" content="0" />
       </Head>
-      {/*{incident && (
-        <Head>
-          {(() => {
-            const metadata = createMetadata({
-              title: incident.title,
-              description: incident.description,
-              img: fallbackImage,
-              type: hasVideo ? "video" : "article",
-              url: `https://news.awaazeye.com/${router.query.id}`,
-              siteName: "Awaaz Eye",
-            });
-
-            return (
-              <>
-                <title>{metadata.title}</title>
-                <meta name="description" content={metadata.description} />
-                <meta property="og:title" content={metadata.openGraph.title} />
-                <meta
-                  property="og:description"
-                  content={metadata.openGraph.description}
-                />
-                <meta property="og:type" content={metadata.openGraph.type} />
-                <meta property="og:url" content={metadata.openGraph.url} />
-                <meta
-                  property="og:site_name"
-                  content={metadata.openGraph.siteName}
-                />
-                {metadata.openGraph.images?.map((img, index) => (
-                  <meta key={index} property="og:image" content={img.url} />
-                ))}
-
-                <meta name="twitter:card" content={metadata.twitter.card} />
-                <meta name="twitter:title" content={metadata.twitter.title} />
-                <meta
-                  name="twitter:description"
-                  content={metadata.twitter.description}
-                />
-                {metadata.twitter.images?.map((img, index) => (
-                  <meta key={index} name="twitter:image" content={img} />
-                ))}
-
-                <meta
-                  name="google-site-verification"
-                  content={metadata.other["google-site-verification"]}
-                />
-              </>
-            );
-          })()}
-        </Head>
-      )}*/}
 
       <div
         className={styles.mainBg}

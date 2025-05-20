@@ -529,7 +529,7 @@
     /* right: 38px; */
     /* Always stick to right edge */
     gap: 10px;
-    right: calc(50vw - 190px + 18px);
+    right: calc(50vw - 200px + 58px);
   }
 
   .actionIcon {
