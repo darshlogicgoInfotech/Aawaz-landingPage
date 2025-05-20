@@ -76,11 +76,11 @@ function getOgPreviewMedia(attachments, fallback) {
   // Find first video
   const firstVideo = attachments.find(att => att.attachmentFileType === "Video" && att.attachment);
   if (firstVideo) {
-    // Use thumbnail if available, else fallback
+    // If thumbnail exists, use it. Else, use video itself as ogImage.
     return {
-      ogImage: firstVideo.thumbnail || fallback,
+      ogImage: firstVideo.thumbnail || firstVideo.attachment,
       video: firstVideo.attachment,
-      videoThumbnail: firstVideo.thumbnail
+      videoThumbnail: firstVideo.thumbnail // can be null
     };
   }
   // Else, find first image
