@@ -68,13 +68,6 @@ function getVideoPoster(videoUrl) {
   )}`;
 }
 
-const getMediaType = (url) => {
-  if (!url) return null;
-  if (url.toLowerCase().endsWith(".mp4")) return "video";
-  if (url.toLowerCase().match(/\.(jpg|jpeg|png|gif|webp)$/)) return "image";
-  return null;
-};
-
 export default function IncidentPage({ initialData, error: serverError }) {
   const router = useRouter();
   const { id } = router.query;
@@ -85,26 +78,6 @@ export default function IncidentPage({ initialData, error: serverError }) {
   const [nearbyEvents, setNearbyEvents] = useState([]);
   // Loading and error states (optional)
   const [loading, setLoading] = useState(true);
-
-  const mediaItems =
-    incident?.attachments?.map((item) => item.attachment) || [];
-  const thumbnails = incident?.attachments?.map((item) => item.thumbnail) || [];
-
-  const firstVideoItem = mediaItems.find(
-    (url) => getMediaType(url) === "video"
-  );
-  const firstImageItem = mediaItems.find(
-    (url) => getMediaType(url) === "image"
-  );
-  const firstThumbnail = thumbnails[0];
-  const videoPoster = firstVideoItem
-    ? `https://awaazeye.com/api/v1/video-thumbnail?url=${encodeURIComponent(
-        firstVideoItem
-      )}`
-    : "";
-  const fallbackImage = firstThumbnail || videoPoster || firstImageItem || "";
-
-  const hasVideo = !!firstVideoItem;
 
   useEffect(() => {
     if (!id) return;
@@ -127,7 +100,7 @@ export default function IncidentPage({ initialData, error: serverError }) {
   const videoRefs = useRef([]);
   const [mutedStates, setMutedStates] = useState([]);
   const [fullscreenMedia, setFullscreenMedia] = useState(null);
-  console.log("jelllooo")
+  console.log("jelllooo");
 
   useEffect(() => {
     if (incident?.media?.length > 0) {
@@ -148,6 +121,33 @@ export default function IncidentPage({ initialData, error: serverError }) {
   const handleCardClick = (id) => {
     router.push(`/${id}`);
   };
+
+  const getMediaType = (url) => {
+    if (!url) return null;
+    if (url.toLowerCase().endsWith(".mp4")) return "video";
+    if (url.toLowerCase().match(/\.(jpg|jpeg|png|gif|webp)$/)) return "image";
+    return null;
+  };
+
+  const mediaItems =
+    incident?.attachments?.map((item) => item.attachment) || [];
+  const thumbnails = incident?.attachments?.map((item) => item.thumbnail) || [];
+
+  const firstVideoItem = mediaItems.find(
+    (url) => getMediaType(url) === "video"
+  );
+  const firstImageItem = mediaItems.find(
+    (url) => getMediaType(url) === "image"
+  );
+  const firstThumbnail = thumbnails[0];
+  const videoPoster = firstVideoItem
+    ? `https://awaazeye.com/api/v1/video-thumbnail?url=${encodeURIComponent(
+        firstVideoItem
+      )}`
+    : "";
+  const fallbackImage = firstThumbnail || videoPoster || firstImageItem || "";
+
+  const hasVideo = !!firstVideoItem;
 
   return (
     <>
@@ -640,35 +640,59 @@ export default function IncidentPage({ initialData, error: serverError }) {
   );
 }
 
-
 export async function getServerSideProps({ params, res }) {
-  if (params.id === 'favicon.ico') {
+  if (params.id === "favicon.ico") {
     return { notFound: true };
   }
 
   // Set strict no-cache headers
-  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
-  res.setHeader('Pragma', 'no-cache');
-  res.setHeader('Expires', '-1');
-  res.setHeader('Surrogate-Control', 'no-store');
-  
+  res.setHeader(
+    "Cache-Control",
+    "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0"
+  );
+  res.setHeader("Pragma", "no-cache");
+  res.setHeader("Expires", "-1");
+  res.setHeader("Surrogate-Control", "no-store");
+
   try {
-    const response = await axios.get(`https://awaazeye.com/api/v1/event-post/event/${params.id}`, {
-      headers: {
-        'Cache-Control': 'no-cache',
-        'Pragma': 'no-cache',
-        'Cache-Control': 'no-store',
-        'Expires': '0'
+    const response = await axios.get(
+      `https://awaazeye.com/api/v1/event-post/event/${params.id}`,
+      {
+        headers: {
+          "Cache-Control": "no-cache",
+          Pragma: "no-cache",
+          "Cache-Control": "no-store",
+          Expires: "0",
+        },
       }
-    });
-    console.log("responce >>>>>>>>", response.data?.body)
-    
+    );
+
+    const nearbyEvents = await axios.get(
+      `https://awaazeye.com/api/v1/event-post/event/${params.id}`,
+      {
+        headers: {
+          "Cache-Control": "no-cache",
+          Pragma: "no-cache",
+          "Cache-Control": "no-store",
+          Expires: "0",
+        },
+      }
+    );
+    // console.log("responce >>>>>>>>", response.data?.body)
+
+    // const [mainIncident, nearbyEvents] = await Promise.all([
+    //   fetch(`https://awaazeye.com/api/v1/event-post/event/${params.id}`),
+    //   fetch(`https://awaazeye.com/api/v1/event-post/other-nearby-events/${params.id}`)
+    // ]);
+
+    // console.log("main incidenet" , mainIncident)
+    console.log("nearby events ??????????????", nearbyEvents);
     if (!response?.data?.body) {
       return {
-        props: { 
-          error: true, 
-          initialData: null 
-        }
+        props: {
+          error: true,
+          initialData: null,
+        },
       };
     }
 
@@ -678,17 +702,17 @@ export async function getServerSideProps({ params, res }) {
       props: {
         initialData: response.data.body,
         error: false,
-        timestamp: new Date().getTime() // Adding timestamp to force refresh
-      }
+        timestamp: new Date().getTime(), // Adding timestamp to force refresh
+      },
     };
   } catch (error) {
-    console.error('Server-side error fetching incident:', error);
+    console.error("Server-side error fetching incident:", error);
     return {
-      props: { 
-        error: true, 
+      props: {
+        error: true,
         initialData: null,
-        timestamp: new Date().getTime()
-      }
+        timestamp: new Date().getTime(),
+      },
     };
   }
 }
