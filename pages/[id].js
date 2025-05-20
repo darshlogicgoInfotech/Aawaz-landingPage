@@ -70,7 +70,7 @@ function getVideoPoster(videoUrl) {
 }
 
 // Helper to get OG image and video info
-function getOgPreviewMedia(attachments) {
+function getOgPreviewMedia(attachments, fallback) {
   if (!attachments || attachments.length === 0) return { ogImage: fallback, video: null, videoThumbnail: null };
 
   // Find first video
@@ -208,7 +208,7 @@ export default function IncidentPage({ initialData, error: serverError }) {
   });
   
   const fallback = "https://guardianshot.blr1.cdn.digitaloceanspaces.com/eagleEye/event-type/1739334564445.png";
-  const { ogImage, video, videoThumbnail } = getOgPreviewMedia(initialData?.attachments);
+  const { ogImage, video, videoThumbnail } = getOgPreviewMedia(initialData?.attachments, fallback);
 
   return (
     <>
