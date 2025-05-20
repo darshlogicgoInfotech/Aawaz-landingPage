@@ -144,31 +144,118 @@ export default function IncidentPage({ initialData, error: serverError }) {
 
   const hasVideo = !!firstVideoItem;
 
+  const metadata = createMetadata({
+    title: incident.title || "Incident Report",
+    description: incident.description || "View details about this incident",
+    img: firstThumbnail || fallbackImage,
+    type: hasVideo ? "video.other" : "article",
+    url: `https://news.awaazeye.com/${id}`,
+    siteName: "Awaaz Eye",
+  });
+
+  console.log("meta" , metadata)
+
   return (
     <>
-      <Head>
+      {/* <Head>
         <title>{incident.title}</title>
+        <meta
+          httpEquiv="Cache-Control"
+          content="no-cache, no-store, must-revalidate"
+        />
+        <meta httpEquiv="Pragma" content="no-cache" />
+        <meta httpEquiv="Expires" content="0" />
+
+        <meta name="title" content={incident.title} />
         <meta name="description" content={incident.description} />
 
-        {/* Open Graph / Facebook */}
         <meta property="og:type" content={hasVideo ? "video" : "article"} />
-        <meta property="og:url" content={`https://news.awaazeye.com/${router.query.id}`} />
+        <meta
+          property="og:url"
+          content={`https://news.awaazeye.com/${router.query.id}`}
+        />
         <meta property="og:title" content={incident.title} />
         <meta property="og:description" content={incident.description} />
         <meta property="og:site_name" content="Awaaz Eye" />
-        <meta property="og:image" content={hasVideo ? fallbackImage : (firstImageItem || fallbackImage)} />
-        <meta property="og:image:width" content="1200" />
-        <meta property="og:image:height" content="630" />
-        <meta property="og:image:alt" content={incident.title} />
 
-        {/* Twitter */}
-        <meta name="twitter:card" content={hasVideo ? "player" : "summary_large_image"} />
+        {hasVideo ? (
+          <>
+            <meta property="og:video" content={firstVideoItem} />
+            <meta property="og:video:type" content="video/mp4" />
+            <meta property="og:video:width" content="1280" />
+            <meta property="og:video:height" content="720" />
+            <meta property="og:image" content={fallbackImage} />
+            <meta property="og:image:width" content="1280" />
+            <meta property="og:image:height" content="720" />
+            <meta property="og:image:alt" content={incident.title} />
+
+            <meta name="twitter:card" content="player" />
+            <meta name="twitter:site" content="@AwaazEye" />
+            <meta name="twitter:title" content={incident.title} />
+            <meta name="twitter:description" content={incident.description} />
+            <meta name="twitter:player" content={firstVideoItem} />
+            <meta name="twitter:player:width" content="1280" />
+            <meta name="twitter:player:height" content="720" />
+            <meta name="twitter:image" content={fallbackImage} />
+          </>
+        ) : (
+          <>
+            <meta
+              property="og:image"
+              content={firstImageItem || fallbackImage}
+            />
+            <meta property="og:image:width" content="1200" />
+            <meta property="og:image:height" content="630" />
+            <meta property="og:image:alt" content={incident.title} />
+
+            <meta name="twitter:card" content="summary_large_image" />
+            <meta name="twitter:site" content="@AwaazEye" />
+            <meta name="twitter:title" content={incident.title} />
+            <meta name="twitter:description" content={incident.description} />
+            <meta
+              name="twitter:image"
+              content={firstImageItem || fallbackImage}
+            />
+          </>
+        )}
+
+        <meta name="msapplication-TileImage" content={fallbackImage} />
+        <meta name="thumbnail" content={fallbackImage} />
+
+        <meta property="og:updated_time" content={new Date().toISOString()} />
+
+        <meta
+          property="article:published_time"
+          content={new Date().toISOString()}
+        />
+        <meta
+          property="article:modified_time"
+          content={new Date().toISOString()}
+        />
+        <meta property="article:author" content="Awaaz Eye" />
+      </Head> */}
+
+      <Head>
+        <title>{metadata.title}</title>
+        <meta name="description" content={metadata.description} />
+
+        <meta property="og:type" content={metadata.openGraph.type} />
+        <meta property="og:url" content={metadata.openGraph.url} />
+        <meta property="og:title" content={metadata.openGraph.title} />
+        <meta
+          property="og:description"
+          content={metadata.openGraph.description}
+        />
+        <meta property="og:site_name" content={metadata.openGraph.siteName} />
+
+        <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:site" content="@AwaazEye" />
-        <meta name="twitter:title" content={incident.title} />
-        <meta name="twitter:description" content={incident.description} />
-        <meta name="twitter:image" content={hasVideo ? fallbackImage : (firstImageItem || fallbackImage)} />
+        <meta name="twitter:title" content={metadata.openGraph.title} />
+        <meta
+          name="twitter:description"
+          content={metadata.openGraph.description}
+        />
 
-        {/* Video specific metadata */}
         {hasVideo && (
           <>
             <meta property="og:video" content={firstVideoItem} />
@@ -176,19 +263,25 @@ export default function IncidentPage({ initialData, error: serverError }) {
             <meta property="og:video:type" content="video/mp4" />
             <meta property="og:video:width" content="1280" />
             <meta property="og:video:height" content="720" />
+            <meta name="twitter:card" content="player" />
             <meta name="twitter:player" content={firstVideoItem} />
             <meta name="twitter:player:width" content="1280" />
             <meta name="twitter:player:height" content="720" />
           </>
         )}
+        <meta property="og:image" content={fallbackImage} />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta name="twitter:image" content={fallbackImage} />
 
-        {/* Additional metadata */}
         <meta property="og:updated_time" content={new Date().toISOString()} />
         <meta name="msapplication-TileImage" content={fallbackImage} />
         <meta name="thumbnail" content={fallbackImage} />
 
-        {/* Cache control */}
-        <meta httpEquiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+        <meta
+          httpEquiv="Cache-Control"
+          content="no-cache, no-store, must-revalidate"
+        />
         <meta httpEquiv="Pragma" content="no-cache" />
         <meta httpEquiv="Expires" content="0" />
       </Head>
