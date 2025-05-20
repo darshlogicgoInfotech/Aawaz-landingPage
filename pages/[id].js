@@ -107,7 +107,13 @@ export default function IncidentPage({ initialData, error: serverError }) {
     }
   }, [incident]);
 
-  if (loading) return <div>Loading...</div>;
+  if (loading)
+    return (
+      <div className={styles.loaderOverlay}>
+        <div className={styles.loader}></div>
+      </div>
+    );
+
   if (!incident) return <Home />;
 
   const handlePlayClick = (item) => {
@@ -153,7 +159,6 @@ export default function IncidentPage({ initialData, error: serverError }) {
     siteName: "Awaaz Eye",
   });
 
-  console.log("meta" , metadata)
 
   return (
     <>
@@ -696,7 +701,6 @@ export async function getServerSideProps({ params, res }) {
     // ]);
 
     // console.log("main incidenet" , mainIncident)
-    console.log("nearby events ??????????????", nearbyEvents);
     if (!response?.data?.body) {
       return {
         props: {
