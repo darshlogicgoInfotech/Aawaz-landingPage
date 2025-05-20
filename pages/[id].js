@@ -133,27 +133,32 @@ export default function IncidentPage({ initialData, error: serverError }) {
   }, [incident]);
 
   if (loading) {
+    // Fallback image
+    const fallback = "https://guardianshot.blr1.cdn.digitaloceanspaces.com/eagleEye/event-type/1739334564445.png";
+    // OG logic for loading state
+    const { ogImage, video, videoThumbnail } = getOgPreviewMedia(initialData?.attachments, fallback);
+
     return (
       <>
         <Head>
           <title>{initialData?.title || "Awaaz Eye Incident"}</title>
           <meta property="og:title" content={initialData?.title || "Awaaz Eye Incident"} />
           <meta property="og:description" content={initialData?.description || "Incident details and updates from Awaaz Eye."} />
-          <meta property="og:image" content={
-            (
-              initialData?.attachments?.[0]?.attachment ||
-              "https://guardianshot.blr1.cdn.digitaloceanspaces.com/eagleEye/event-type/1739334564445.png")
-          } />
+          <meta property="og:image" content={ogImage} />
           <meta property="og:url" content={`https://aawaz-landingpage.onrender.com/${id}`} />
-          <meta property="og:type" content="article" />
-          <meta name="twitter:card" content="summary_large_image" />
+          <meta property="og:type" content={video ? "video.other" : "article"} />
+          <meta name="twitter:card" content={video ? "player" : "summary_large_image"} />
           <meta name="twitter:title" content={initialData?.title || "Awaaz Eye Incident"} />
           <meta name="twitter:description" content={initialData?.description || "Incident details and updates from Awaaz Eye."} />
-          <meta name="twitter:image" content={
-            (initialData?.attachments?.[0]?.thumbnail ||
-              initialData?.attachments?.[0]?.attachment ||
-              "https://guardianshot.blr1.cdn.digitaloceanspaces.com/eagleEye/event-type/1739334564445.png")
-          } />
+          <meta name="twitter:image" content={ogImage} />
+          {video && (
+            <>
+              <meta property="og:video" content={video} />
+              <meta property="og:video:type" content="video/mp4" />
+              <meta property="og:video:width" content="1280" />
+              <meta property="og:video:height" content="720" />
+            </>
+          )}
         </Head>
         <div className={styles.loaderOverlay}>
           <div className={styles.loader}></div>
@@ -209,6 +214,7 @@ export default function IncidentPage({ initialData, error: serverError }) {
   
   const fallback = "https://guardianshot.blr1.cdn.digitaloceanspaces.com/eagleEye/event-type/1739334564445.png";
   const { ogImage, video, videoThumbnail } = getOgPreviewMedia(initialData?.attachments, fallback);
+
 
   return (
     <>
