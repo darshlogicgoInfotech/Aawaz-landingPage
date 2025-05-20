@@ -155,32 +155,135 @@ export default function IncidentPage({ initialData, error: serverError }) {
 
   console.log("meta" , metadata)
 
-  console.log("hasVideo" , hasVideo)
-  console.log("firstVideoItem" , firstVideoItem)
-  console.log("fallbackImage" , fallbackImage)
-  console.log("metadata.title" , metadata.title)
-
   return (
     <>
+      {/* <Head>
+        <title>{incident.title}</title>
+        <meta
+          httpEquiv="Cache-Control"
+          content="no-cache, no-store, must-revalidate"
+        />
+        <meta httpEquiv="Pragma" content="no-cache" />
+        <meta httpEquiv="Expires" content="0" />
+
+        <meta name="title" content={incident.title} />
+        <meta name="description" content={incident.description} />
+
+        <meta property="og:type" content={hasVideo ? "video" : "article"} />
+        <meta
+          property="og:url"
+          content={`https://news.awaazeye.com/${router.query.id}`}
+        />
+        <meta property="og:title" content={incident.title} />
+        <meta property="og:description" content={incident.description} />
+        <meta property="og:site_name" content="Awaaz Eye" />
+
+        {hasVideo ? (
+          <>
+            <meta property="og:video" content={firstVideoItem} />
+            <meta property="og:video:type" content="video/mp4" />
+            <meta property="og:video:width" content="1280" />
+            <meta property="og:video:height" content="720" />
+            <meta property="og:image" content={fallbackImage} />
+            <meta property="og:image:width" content="1280" />
+            <meta property="og:image:height" content="720" />
+            <meta property="og:image:alt" content={incident.title} />
+
+            <meta name="twitter:card" content="player" />
+            <meta name="twitter:site" content="@AwaazEye" />
+            <meta name="twitter:title" content={incident.title} />
+            <meta name="twitter:description" content={incident.description} />
+            <meta name="twitter:player" content={firstVideoItem} />
+            <meta name="twitter:player:width" content="1280" />
+            <meta name="twitter:player:height" content="720" />
+            <meta name="twitter:image" content={fallbackImage} />
+          </>
+        ) : (
+          <>
+            <meta
+              property="og:image"
+              content={firstImageItem || fallbackImage}
+            />
+            <meta property="og:image:width" content="1200" />
+            <meta property="og:image:height" content="630" />
+            <meta property="og:image:alt" content={incident.title} />
+
+            <meta name="twitter:card" content="summary_large_image" />
+            <meta name="twitter:site" content="@AwaazEye" />
+            <meta name="twitter:title" content={incident.title} />
+            <meta name="twitter:description" content={incident.description} />
+            <meta
+              name="twitter:image"
+              content={firstImageItem || fallbackImage}
+            />
+          </>
+        )}
+
+        <meta name="msapplication-TileImage" content={fallbackImage} />
+        <meta name="thumbnail" content={fallbackImage} />
+
+        <meta property="og:updated_time" content={new Date().toISOString()} />
+
+        <meta
+          property="article:published_time"
+          content={new Date().toISOString()}
+        />
+        <meta
+          property="article:modified_time"
+          content={new Date().toISOString()}
+        />
+        <meta property="article:author" content="Awaaz Eye" />
+      </Head> */}
+
       <Head>
-        {/* HTML Meta Tags */}
-        <title>Essential Steps for Effective Budget Management: A Guide to Financial Success</title>
-        <meta name="description" content="Whether you live from paycheque to paycheque or can easily afford some indulgences, you must know how to manage money properly. It's not as complicated as it might seem. You go over your spending, work out a budget, and do your best to stick to it. Here you will find some basic money management tips to help you navigate the world of personal finances." />
+        <title>{metadata.title}</title>
+        <meta name="description" content={metadata.description} />
 
-        {/* Facebook Meta Tags */}
-        <meta property="og:url" content="https://aawaz-landingpage.onrender.com/68271d18405a38c494e0124b" />
-        <meta property="og:type" content="website" />
-        <meta property="og:title" content="Essential Steps for Effective Budget Management: A Guide to Financial Success" />
-        <meta property="og:description" content="Whether you live from paycheque to paycheque or can easily afford some indulgences, you must know how to manage money properly. It's not as complicated as it might seem. You go over your spending, work out a budget, and do your best to stick to it. Here you will find some basic money management tips to help you navigate the world of personal finances." />
-        <meta property="og:image" content="https://guardianshot.blr1.cdn.digitaloceanspaces.com/eagleEye/event-type/1739334564445.png" />
+        <meta property="og:type" content={metadata.openGraph.type} />
+        <meta property="og:url" content={metadata.openGraph.url} />
+        <meta property="og:title" content={metadata.openGraph.title} />
+        <meta
+          property="og:description"
+          content={metadata.openGraph.description}
+        />
+        <meta property="og:site_name" content={metadata.openGraph.siteName} />
 
-        {/* Twitter Meta Tags */}
         <meta name="twitter:card" content="summary_large_image" />
-        <meta property="twitter:domain" content="aawaz-landingpage.onrender.com" />
-        <meta property="twitter:url" content="https://aawaz-landingpage.onrender.com/68271d18405a38c494e0124b" />
-        <meta name="twitter:title" content="Essential Steps for Effective Budget Management: A Guide to Financial Success" />
-        <meta name="twitter:description" content="Whether you live from paycheque to paycheque or can easily afford some indulgences, you must know how to manage money properly. It's not as complicated as it might seem. You go over your spending, work out a budget, and do your best to stick to it. Here you will find some basic money management tips to help you navigate the world of personal finances." />
-        <meta name="twitter:image" content="https://guardianshot.blr1.cdn.digitaloceanspaces.com/eagleEye/event-type/1739334564445.png" />
+        <meta name="twitter:site" content="@AwaazEye" />
+        <meta name="twitter:title" content={metadata.openGraph.title} />
+        <meta
+          name="twitter:description"
+          content={metadata.openGraph.description}
+        />
+
+        {hasVideo && (
+          <>
+            <meta property="og:video" content={firstVideoItem} />
+            <meta property="og:video:secure_url" content={firstVideoItem} />
+            <meta property="og:video:type" content="video/mp4" />
+            <meta property="og:video:width" content="1280" />
+            <meta property="og:video:height" content="720" />
+            <meta name="twitter:card" content="player" />
+            <meta name="twitter:player" content={firstVideoItem} />
+            <meta name="twitter:player:width" content="1280" />
+            <meta name="twitter:player:height" content="720" />
+          </>
+        )}
+        <meta property="og:image" content={fallbackImage} />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta name="twitter:image" content={fallbackImage} />
+
+        <meta property="og:updated_time" content={new Date().toISOString()} />
+        <meta name="msapplication-TileImage" content={fallbackImage} />
+        <meta name="thumbnail" content={fallbackImage} />
+
+        <meta
+          httpEquiv="Cache-Control"
+          content="no-cache, no-store, must-revalidate"
+        />
+        <meta httpEquiv="Pragma" content="no-cache" />
+        <meta httpEquiv="Expires" content="0" />
       </Head>
 
       <div
@@ -572,7 +675,7 @@ export async function getServerSideProps({ params, res }) {
     );
 
     const nearbyEvents = await axios.get(
-      `https://awaazeye.com/api/v1/event-post/other-nearby-events/${params.id}`,
+      `https://awaazeye.com/api/v1/event-post/event/${params.id}`,
       {
         headers: {
           "Cache-Control": "no-cache",
