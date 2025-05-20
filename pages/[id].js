@@ -69,7 +69,31 @@ function getVideoPoster(videoUrl) {
   )}`;
 }
 
+// Helper to get OG image and video info
+function getOgPreviewMedia(attachments) {
+  if (!attachments || attachments.length === 0) return { ogImage: fallback, video: null, videoThumbnail: null };
+
+  // Find first video
+  const firstVideo = attachments.find(att => att.attachmentFileType === "Video" && att.attachment);
+  if (firstVideo) {
+    // Use thumbnail if available, else fallback
+    return {
+      ogImage: firstVideo.thumbnail || fallback,
+      video: firstVideo.attachment,
+      videoThumbnail: firstVideo.thumbnail
+    };
+  }
+  // Else, find first image
+  const firstImage = attachments.find(att => att.attachmentFileType === "Image" && att.attachment);
+  if (firstImage) {
+    return { ogImage: firstImage.attachment, video: null, videoThumbnail: null };
+  }
+  // Fallback
+  return { ogImage: fallback, video: null, videoThumbnail: null };
+}
+
 export default function IncidentPage({ initialData, error: serverError }) {
+  console.log("Initial Data:", initialData)
   const router = useRouter();
   const { id } = router.query;
 
@@ -116,7 +140,7 @@ export default function IncidentPage({ initialData, error: serverError }) {
           <meta property="og:title" content={initialData?.title || "Awaaz Eye Incident"} />
           <meta property="og:description" content={initialData?.description || "Incident details and updates from Awaaz Eye."} />
           <meta property="og:image" content={
-            (initialData?.attachments?.[0]?.thumbnail ||
+            (
               initialData?.attachments?.[0]?.attachment ||
               "https://guardianshot.blr1.cdn.digitaloceanspaces.com/eagleEye/event-type/1739334564445.png")
           } />
@@ -183,19 +207,30 @@ export default function IncidentPage({ initialData, error: serverError }) {
     siteName: "Awaaz Eye",
   });
   
+  const fallback = "https://guardianshot.blr1.cdn.digitaloceanspaces.com/eagleEye/event-type/1739334564445.png";
+  const { ogImage, video, videoThumbnail } = getOgPreviewMedia(initialData?.attachments);
+
   return (
     <>
       <Head>
-        <title>{incident?.title || "Awaaz Eye Incident"}</title>
-        <meta property="og:title" content={incident?.title || "Awaaz Eye Incident"} />
-        <meta property="og:description" content={incident?.description || "Incident details and updates from Awaaz Eye."} />
-        <meta property="og:image" content={firstImageItem || fallbackImage || "https://guardianshot.blr1.cdn.digitaloceanspaces.com/eagleEye/event-type/1739334564445.png"} />
+        <title>{initialData?.title || "Awaaz Eye Incident"}</title>
+        <meta property="og:title" content={initialData?.title || "Awaaz Eye Incident"} />
+        <meta property="og:description" content={initialData?.description || "Incident details and updates from Awaaz Eye."} />
+        <meta property="og:image" content={ogImage} />
         <meta property="og:url" content={`https://aawaz-landingpage.onrender.com/${id}`} />
-        <meta property="og:type" content={hasVideo ? "video.other" : "article"} />
-        <meta name="twitter:card" content={hasVideo ? "player" : "summary_large_image"} />
-        <meta name="twitter:title" content={incident?.title || "Awaaz Eye Incident"} />
-        <meta name="twitter:description" content={incident?.description || "Incident details and updates from Awaaz Eye."} />
-        <meta name="twitter:image" content={firstImageItem || fallbackImage || "https://guardianshot.blr1.cdn.digitaloceanspaces.com/eagleEye/event-type/1739334564445.png"} />
+        <meta property="og:type" content={video ? "video.other" : "article"} />
+        <meta name="twitter:card" content={video ? "player" : "summary_large_image"} />
+        <meta name="twitter:title" content={initialData?.title || "Awaaz Eye Incident"} />
+        <meta name="twitter:description" content={initialData?.description || "Incident details and updates from Awaaz Eye."} />
+        <meta name="twitter:image" content={ogImage} />
+        {video && (
+          <>
+            <meta property="og:video" content={video} />
+            <meta property="og:video:type" content="video/mp4" />
+            <meta property="og:video:width" content="1280" />
+            <meta property="og:video:height" content="720" />
+          </>
+        )}
       </Head>
 
       <NextSeo
