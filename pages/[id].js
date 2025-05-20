@@ -75,17 +75,17 @@ const getMediaType = (url) => {
   return null;
 };
 
-export default function IncidentPage() {
+export default function IncidentPage({ initialData, error: serverError }) {
   const router = useRouter();
   const { id } = router.query;
 
   // State for main incident
-  const [incident, setIncident] = useState(null);
+  const [incident, setIncident] = useState(initialData);
   // State for nearby events
   const [nearbyEvents, setNearbyEvents] = useState([]);
   // Loading and error states (optional)
   const [loading, setLoading] = useState(true);
-  console.log("incident >>>>>>>>>", incident);
+
   const mediaItems =
     incident?.attachments?.map((item) => item.attachment) || [];
   const thumbnails = incident?.attachments?.map((item) => item.thumbnail) || [];
@@ -151,7 +151,7 @@ export default function IncidentPage() {
 
   return (
     <>
-      {/* <Head>
+      <Head>
         <title>{incident.title}</title>
         <meta
           httpEquiv="Cache-Control"
@@ -227,8 +227,8 @@ export default function IncidentPage() {
           content={new Date().toISOString()}
         />
         <meta property="article:author" content="Awaaz Eye" />
-      </Head> */}
-      {incident && (
+      </Head>
+      {/*{incident && (
         <Head>
           {(() => {
             const metadata = createMetadata({
@@ -277,7 +277,7 @@ export default function IncidentPage() {
             );
           })()}
         </Head>
-      )}
+      )}*/}
 
       <div
         className={styles.mainBg}
@@ -638,4 +638,57 @@ export default function IncidentPage() {
       </div>
     </>
   );
+}
+
+
+export async function getServerSideProps({ params, res }) {
+  if (params.id === 'favicon.ico') {
+    return { notFound: true };
+  }
+
+  // Set strict no-cache headers
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '-1');
+  res.setHeader('Surrogate-Control', 'no-store');
+  
+  try {
+    const response = await axios.get(`https://awaazeye.com/api/v1/event-post/event/${params.id}`, {
+      headers: {
+        'Cache-Control': 'no-cache',
+        'Pragma': 'no-cache',
+        'Cache-Control': 'no-store',
+        'Expires': '0'
+      }
+    });
+    console.log("responce >>>>>>>>", response.data?.body)
+    
+    if (!response?.data?.body) {
+      return {
+        props: { 
+          error: true, 
+          initialData: null 
+        }
+      };
+    }
+
+    // const formattedData = formatIncidentData(response.data.body);
+
+    return {
+      props: {
+        initialData: response.data.body,
+        error: false,
+        timestamp: new Date().getTime() // Adding timestamp to force refresh
+      }
+    };
+  } catch (error) {
+    console.error('Server-side error fetching incident:', error);
+    return {
+      props: { 
+        error: true, 
+        initialData: null,
+        timestamp: new Date().getTime()
+      }
+    };
+  }
 }
