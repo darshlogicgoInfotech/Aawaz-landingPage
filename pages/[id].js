@@ -24,6 +24,7 @@ import { MdVolumeOff } from "react-icons/md";
 import Home from ".";
 import { IoMdClose } from "react-icons/io";
 import { createMetadata } from "../utils/commonMeta";
+import { NextSeo } from "next-seo";
 
 // Helper function to format incident data
 function formatIncidentData(data) {
@@ -162,134 +163,49 @@ export default function IncidentPage({ initialData, error: serverError }) {
 
   return (
     <>
-      {/* <Head>
-        <title>{incident.title}</title>
-        <meta
-          httpEquiv="Cache-Control"
-          content="no-cache, no-store, must-revalidate"
-        />
-        <meta httpEquiv="Pragma" content="no-cache" />
-        <meta httpEquiv="Expires" content="0" />
-
-        <meta name="title" content={incident.title} />
-        <meta name="description" content={incident.description} />
-
-        <meta property="og:type" content={hasVideo ? "video" : "article"} />
-        <meta
-          property="og:url"
-          content={`https://news.awaazeye.com/${router.query.id}`}
-        />
-        <meta property="og:title" content={incident.title} />
-        <meta property="og:description" content={incident.description} />
-        <meta property="og:site_name" content="Awaaz Eye" />
-
-        {hasVideo ? (
-          <>
-            <meta property="og:video" content={firstVideoItem} />
-            <meta property="og:video:type" content="video/mp4" />
-            <meta property="og:video:width" content="1280" />
-            <meta property="og:video:height" content="720" />
-            <meta property="og:image" content={fallbackImage} />
-            <meta property="og:image:width" content="1280" />
-            <meta property="og:image:height" content="720" />
-            <meta property="og:image:alt" content={incident.title} />
-
-            <meta name="twitter:card" content="player" />
-            <meta name="twitter:site" content="@AwaazEye" />
-            <meta name="twitter:title" content={incident.title} />
-            <meta name="twitter:description" content={incident.description} />
-            <meta name="twitter:player" content={firstVideoItem} />
-            <meta name="twitter:player:width" content="1280" />
-            <meta name="twitter:player:height" content="720" />
-            <meta name="twitter:image" content={fallbackImage} />
-          </>
-        ) : (
-          <>
-            <meta
-              property="og:image"
-              content={firstImageItem || fallbackImage}
-            />
-            <meta property="og:image:width" content="1200" />
-            <meta property="og:image:height" content="630" />
-            <meta property="og:image:alt" content={incident.title} />
-
-            <meta name="twitter:card" content="summary_large_image" />
-            <meta name="twitter:site" content="@AwaazEye" />
-            <meta name="twitter:title" content={incident.title} />
-            <meta name="twitter:description" content={incident.description} />
-            <meta
-              name="twitter:image"
-              content={firstImageItem || fallbackImage}
-            />
-          </>
-        )}
-
-        <meta name="msapplication-TileImage" content={fallbackImage} />
-        <meta name="thumbnail" content={fallbackImage} />
-
-        <meta property="og:updated_time" content={new Date().toISOString()} />
-
-        <meta
-          property="article:published_time"
-          content={new Date().toISOString()}
-        />
-        <meta
-          property="article:modified_time"
-          content={new Date().toISOString()}
-        />
-        <meta property="article:author" content="Awaaz Eye" />
-      </Head> */}
-
-      <Head>
-        <title>{metadata.title}</title>
-        <meta name="description" content={metadata.description} />
-
-        <meta property="og:type" content={metadata.openGraph.type} />
-        <meta property="og:url" content={metadata.openGraph.url} />
-        <meta property="og:title" content={metadata.openGraph.title} />
-        <meta
-          property="og:description"
-          content={metadata.openGraph.description}
-        />
-        <meta property="og:site_name" content={metadata.openGraph.siteName} />
-
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:site" content="@AwaazEye" />
-        <meta name="twitter:title" content={metadata.openGraph.title} />
-        <meta
-          name="twitter:description"
-          content={metadata.openGraph.description}
-        />
-
-        {hasVideo && (
-          <>
-            <meta property="og:video" content={firstVideoItem} />
-            <meta property="og:video:secure_url" content={firstVideoItem} />
-            <meta property="og:video:type" content="video/mp4" />
-            <meta property="og:video:width" content="1280" />
-            <meta property="og:video:height" content="720" />
-            <meta name="twitter:card" content="player" />
-            <meta name="twitter:player" content={firstVideoItem} />
-            <meta name="twitter:player:width" content="1280" />
-            <meta name="twitter:player:height" content="720" />
-          </>
-        )}
-        <meta property="og:image" content={fallbackImage} />
-        <meta property="og:image:width" content="1200" />
-        <meta property="og:image:height" content="630" />
-        <meta name="twitter:image" content={fallbackImage} />
-
-        <meta property="og:updated_time" content={new Date().toISOString()} />
-        <meta name="msapplication-TileImage" content={fallbackImage} />
-        <meta name="thumbnail" content={fallbackImage} />
-
-        <meta
-          httpEquiv="Cache-Control"
-          content="no-cache, no-store, must-revalidate"
-        />
-        <meta httpEquiv="Pragma" content="no-cache" />
-        <meta httpEquiv="Expires" content="0" />
-      </Head>
+      <NextSeo
+        title={initialData?.title || "Awaaz Eye Incident"}
+        description={initialData?.description || "Incident details and updates from Awaaz Eye."}
+        canonical={`https://news.awaazeye.com/${id}`}
+        openGraph={{
+          type: hasVideo ? "video.other" : "article",
+          url: `https://news.awaazeye.com/${id}`,
+          title: initialData?.title || "Awaaz Eye Incident",
+          description: initialData?.description || "Incident details and updates from Awaaz Eye.",
+          site_name: "Awaaz Eye",
+          images: [
+            {
+              url: firstImageItem || fallbackImage || "https://guardianshot.blr1.cdn.digitaloceanspaces.com/eagleEye/event-type/1739334564445.png",
+              width: 1200,
+              height: 630,
+              alt: initialData?.title || "Awaaz Eye Incident",
+            },
+          ],
+          ...(hasVideo && {
+            videos: [
+              {
+                url: firstVideoItem,
+                secureUrl: firstVideoItem,
+                type: "video/mp4",
+                width: 1280,
+                height: 720,
+              },
+            ],
+          }),
+        }}
+        twitter={{
+          cardType: hasVideo ? "player" : "summary_large_image",
+          site: "@AwaazEye",
+          title: initialData?.title || "Awaaz Eye Incident",
+          description: initialData?.description || "Incident details and updates from Awaaz Eye.",
+          image: firstImageItem || fallbackImage || "https://guardianshot.blr1.cdn.digitaloceanspaces.com/eagleEye/event-type/1739334564445.png",
+          ...(hasVideo && {
+            player: firstVideoItem,
+            playerWidth: 1280,
+            playerHeight: 720,
+          }),
+        }}
+      />
 
       <div
         className={styles.mainBg}
