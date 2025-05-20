@@ -168,19 +168,19 @@ export default function IncidentPage({ initialData, error: serverError }) {
         <meta name="description" content="Whether you live from paycheque to paycheque or can easily afford some indulgences, you must know how to manage money properly. It's not as complicated as it might seem. You go over your spending, work out a budget, and do your best to stick to it. Here you will find some basic money management tips to help you navigate the world of personal finances." />
 
         {/* Facebook Meta Tags */}
-        <meta property="og:url" content="https://walletsync.app/blog/essential-steps-for-effective-budget-management-a-guide-to-financial-success" />
+        <meta property="og:url" content="https://aawaz-landingpage.onrender.com/68271d18405a38c494e0124b" />
         <meta property="og:type" content="website" />
         <meta property="og:title" content="Essential Steps for Effective Budget Management: A Guide to Financial Success" />
         <meta property="og:description" content="Whether you live from paycheque to paycheque or can easily afford some indulgences, you must know how to manage money properly. It's not as complicated as it might seem. You go over your spending, work out a budget, and do your best to stick to it. Here you will find some basic money management tips to help you navigate the world of personal finances." />
-        <meta property="og:image" content="https://guardianshot.blr1.digitaloceanspaces.com/expense/blogs/93919a05-0fd3-4622-9faa-4799c7112fdd.jpg" />
+        <meta property="og:image" content="https://guardianshot.blr1.cdn.digitaloceanspaces.com/eagleEye/event-type/1739334564445.png" />
 
         {/* Twitter Meta Tags */}
         <meta name="twitter:card" content="summary_large_image" />
-        <meta property="twitter:domain" content="walletsync.app" />
-        <meta property="twitter:url" content="https://walletsync.app/blog/essential-steps-for-effective-budget-management-a-guide-to-financial-success" />
+        <meta property="twitter:domain" content="aawaz-landingpage.onrender.com" />
+        <meta property="twitter:url" content="https://aawaz-landingpage.onrender.com/68271d18405a38c494e0124b" />
         <meta name="twitter:title" content="Essential Steps for Effective Budget Management: A Guide to Financial Success" />
         <meta name="twitter:description" content="Whether you live from paycheque to paycheque or can easily afford some indulgences, you must know how to manage money properly. It's not as complicated as it might seem. You go over your spending, work out a budget, and do your best to stick to it. Here you will find some basic money management tips to help you navigate the world of personal finances." />
-        <meta name="twitter:image" content="https://guardianshot.blr1.digitaloceanspaces.com/expense/blogs/93919a05-0fd3-4622-9faa-4799c7112fdd.jpg" />
+        <meta name="twitter:image" content="https://guardianshot.blr1.cdn.digitaloceanspaces.com/eagleEye/event-type/1739334564445.png" />
       </Head>
 
       <div
