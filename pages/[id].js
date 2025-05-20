@@ -678,7 +678,7 @@ export async function getServerSideProps({ params, res }) {
     );
 
     const nearbyEvents = await axios.get(
-      `https://awaazeye.com/api/v1/event-post/event/${params.id}`,
+      `https://awaazeye.com/api/v1/event-post/other-nearby-events/${params.id}`,
       {
         headers: {
           "Cache-Control": "no-cache",
