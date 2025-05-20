@@ -263,6 +263,7 @@ export default function IncidentPage({ initialData, error: serverError }) {
             <meta property="og:video:type" content="video/mp4" />
             <meta property="og:video:width" content="1280" />
             <meta property="og:video:height" content="720" />
+            <meta property="og:video:url" content={firstVideoItem} />
             <meta name="twitter:card" content="player" />
             <meta name="twitter:player" content={firstVideoItem} />
             <meta name="twitter:player:width" content="1280" />
@@ -270,8 +271,10 @@ export default function IncidentPage({ initialData, error: serverError }) {
           </>
         )}
         <meta property="og:image" content={fallbackImage} />
+        <meta property="og:image:secure_url" content={fallbackImage} />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
+        <meta property="og:image:alt" content={metadata.title} />
         <meta name="twitter:image" content={fallbackImage} />
 
         <meta property="og:updated_time" content={new Date().toISOString()} />
