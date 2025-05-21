@@ -78,7 +78,7 @@
 .sliderViewsOverlay {
   position: absolute;
   left: 2px;
-  bottom: 2px;
+  bottom: 10px;
   color: #fff;
   padding: 6px 14px;
   border-radius: 18px;
@@ -103,9 +103,9 @@
   /* cursor: pointer; */
 }
 
-/* .fullscreenBtn {
+.fullscreenBtn {
   position: absolute;
-  bottom: 10px;
+  top: 10px;
   right: 10px;
   background: rgba(0, 0, 0, 0.5);
   border: none;
@@ -116,32 +116,39 @@
   width: 36px;
   height: 36px;
   display: flex;
-} */
+  justify-content: center;
+  align-items: center;
+}
 
 .videoWrapper {
   position: relative;
 }
 
-.muteBtn,
-.fullscreenBtn {
+.muteBtn {
   position: absolute;
   bottom: 10px;
+  right: 10px !important;
   width: 36px;
   height: 36px;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: transparent;
   border: none;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  z-index: 20; 
-  pointer-events: auto; 
+  /* z-index: 20;
+  pointer-events: auto; */
+}
+
+.volumeIcon {
+  font-size: 50px !important;
+  color: white;
 }
 
 .muteBtn:hover,
 .fullscreenBtn:hover {
-  background-color: rgba(255, 255, 255, 0.2);
+  /* background-color: rgba(255, 255, 255, 0.2); */
 }
 
 .fullscreenBtn {
@@ -188,7 +195,7 @@
   color: #ffffff;
   font-size: 0.88rem;
   font-family: "Roboto", sans-serif;
-  margin-top: 18px;
+  margin-top: 10px;
   line-height: 2;
   opacity: 0.9;
   font-weight: 200;
@@ -214,33 +221,33 @@
 }
 
 .titleRow {
-  font-size: 34px;
+  font-size: 30px;
   font-weight: 800;
   margin: 13px 0 8px;
   font-family: "Playfair Display", serif;
   color: #fff;
   /* text-align: center; */
-  max-width: 75%;
+  max-width: 90%;
   line-height: 1.2;
 }
 
 .descRow {
-  color: #ffffff;
+  color: white;
   font-size: 15px;
   line-height: 1.4;
   font-family: "Roboto", sans-serif !important;
   font-weight: 200;
   max-width: 80%;
-  opacity: 0.8;
+  opacity: 1 !important;
   letter-spacing: 0.5px;
-  margin-top: 15px;
+  margin-top: 10px;
 }
 
 .timelineTitle {
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 32px 0 18px 0;
+  margin: 32px 0 0px 0;
   width: 100%;
   font-size: 30px;
   font-weight: 900;
@@ -273,7 +280,7 @@
   flex-direction: column;
   align-items: center;
   width: 100%;
-  margin-top: 40px;
+  margin-top: 20px;
 }
 
 .timelineItem {
@@ -336,7 +343,6 @@
 .timelineDesc {
   color: #e2e8f0;
   font-size: 0.95rem;
-  margin-top: 6px;
   font-weight: 400;
   text-align: center;
   max-width: 75%;
@@ -418,7 +424,7 @@
 .areaCardTitle {
   font-size: 17px;
   font-weight: 600;
-  color: #fff;
+  color: #ffffff;
   margin: 8px 0 4px;
   font-family: "Roboto", sans-serif;
 }
@@ -451,7 +457,7 @@
 
 .incidentActions {
   position: fixed;
-  top: 380px;
+  bottom: 40px;
   right: calc(50vw - 225px + 8px);
   display: flex;
   flex-direction: column;
@@ -517,31 +523,97 @@
     max-width: 100%;
     width: 100%;
     margin: 0;
-    padding: 12px 6px;
+    padding: 12px 10px;
     box-sizing: border-box;
+  }
+
+  .actionIconImage {
+    width: 64px;
+    height: 64px;
+  }
+
+  .timelineTime {
+    font-size: 14px;
   }
 }
 
 @media (max-width: 600px) {
   .incidentActions {
-    top: 63%;
+    bottom: 5%;
     /* Lower for mobile */
     /* right: 38px; */
     /* Always stick to right edge */
     gap: 10px;
-    right: 20px;
+    right: 15px;
     /* right: calc(50vw - 240px + 58px); */
   }
 
+  .titleRow {
+    font-size: 20px;
+    max-width: 95%;
+  }
+
+  .descRow {
+    font-size: 13px;
+    max-width: 95%;
+  }
+
   .actionIcon {
-    width: 56px;
-    height: 56px;
+    width: 45px;
+    height: 45px;
+    border-radius: 50px;
   }
 
   .actionIcon img,
   .actionIcon svg {
     width: 24px;
     height: 24px;
+  }
+
+  .areaCardTitle {
+    font-size: 13px;
+  }
+
+  .areaCardDesc {
+    font-size: 11px;
+  }
+
+  .areaTitle {
+    font-size: 22px;
+  }
+
+  .timelineTitle {
+    font-size: 24px;
+  }
+
+  .timelineDesc {
+    font-size: 13px;
+  }
+
+  .metaRow {
+    font-size: 13px;
+    gap: 8px;
+  }
+
+  .notified {
+    font-size: 13px;
+  }
+
+  .playIcon {
+    font-size: 1.1rem;
+    color: #fff;
+    background: #1c1c1e;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+
+  .areaMetaRow {
+    font-size: 13px;
   }
 }
 
@@ -550,13 +622,13 @@
   top: 0; /* ✅ Stick to top of container */
   background: #000000;
   z-index: 10;
-  padding: 12px 0;
+  padding: 15px 0 15px 0;
   text-align: center;
   font-size: 1.8rem;
   font-family: "Playfair Display", serif;
   font-weight: 800;
   color: white;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);    
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
   margin-left: -24px;
   margin-right: -24px;
   padding-left: 24px;
@@ -565,13 +637,14 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 100%; 
+  max-width: 100%;
 }
 
 @media (max-width: 600px) {
   .stickyHeader {
-    height: 48px;
+    /* height: 48px; */
     font-size: 1.3rem;
+    padding-bottom: 20px;
   }
 }
 
@@ -678,4 +751,45 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+/* Add/replace in IncidentPage.module.css */
+.customDots {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  margin-bottom: 8px;
+  width: 100%;
+  /* Remove position: absolute if you had it */
+}
+
+.dotCustom {
+  border-radius: 50%;
+  background: #1c1c1e;
+  cursor: pointer;
+  border: 2px solid transparent;
+  width: 16.869829523974428px;
+  height: 4.887665318557474px;
+  border-radius: 60px;
+  /* angle: 0.48 deg; */
+}
+
+.activeDot {
+  background: #ffffff;
+  width: 16.869829075219283px;
+  height: 4.887665277120577px;
+  top: 0.39px;
+  border-radius: 60px;
+}
+
+.showMore {
+  color: #00e676;
+  cursor: pointer;
+  font-size: 0.95em;
+  font-weight: 500;
+  margin-left: 8px;
+  text-decoration: underline;
+  user-select: none;
 }

@@ -19,8 +19,8 @@ import "swiper/css";
 import "swiper/css/pagination";
 import { FaRegEye, FaVolumeMute, FaVolumeUp } from "react-icons/fa";
 import { FiMaximize } from "react-icons/fi";
-import { MdVolumeUp } from "react-icons/md";
-import { MdVolumeOff } from "react-icons/md";
+import { MdOutlineVolumeUp } from "react-icons/md";
+import { MdOutlineVolumeOff } from "react-icons/md";
 import Home from ".";
 import { IoMdClose } from "react-icons/io";
 import { createMetadata } from "../utils/commonMeta";
@@ -71,29 +71,37 @@ function getVideoPoster(videoUrl) {
 
 // Helper to get OG image and video info
 function getOgPreviewMedia(attachments, fallback) {
-  if (!attachments || attachments.length === 0) return { ogImage: fallback, video: null, videoThumbnail: null };
+  if (!attachments || attachments.length === 0)
+    return { ogImage: fallback, video: null, videoThumbnail: null };
 
   // Find first video
-  const firstVideo = attachments.find(att => att.attachmentFileType === "Video" && att.attachment);
+  const firstVideo = attachments.find(
+    (att) => att.attachmentFileType === "Video" && att.attachment
+  );
   if (firstVideo) {
     // If thumbnail exists, use it. Else, use video itself as ogImage.
     return {
       ogImage: firstVideo.thumbnail || firstVideo.attachment,
       video: firstVideo.attachment,
-      videoThumbnail: firstVideo.thumbnail // can be null
+      videoThumbnail: firstVideo.thumbnail, // can be null
     };
   }
   // Else, find first image
-  const firstImage = attachments.find(att => att.attachmentFileType === "Image" && att.attachment);
+  const firstImage = attachments.find(
+    (att) => att.attachmentFileType === "Image" && att.attachment
+  );
   if (firstImage) {
-    return { ogImage: firstImage.attachment, video: null, videoThumbnail: null };
+    return {
+      ogImage: firstImage.attachment,
+      video: null,
+      videoThumbnail: null,
+    };
   }
   // Fallback
   return { ogImage: fallback, video: null, videoThumbnail: null };
 }
 
 export default function IncidentPage({ initialData, error: serverError }) {
-  // console.log("Initial Data:", initialData)
   const router = useRouter();
   const { id } = router.query;
 
@@ -103,6 +111,7 @@ export default function IncidentPage({ initialData, error: serverError }) {
   const [nearbyEvents, setNearbyEvents] = useState([]);
   // Loading and error states (optional)
   const [loading, setLoading] = useState(true);
+  const [showFullTitle, setShowFullTitle] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -125,6 +134,8 @@ export default function IncidentPage({ initialData, error: serverError }) {
   const videoRefs = useRef([]);
   const [mutedStates, setMutedStates] = useState([]);
   const [fullscreenMedia, setFullscreenMedia] = useState(null);
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const swiperRef = useRef(null);
 
   useEffect(() => {
     if (incident?.media?.length > 0) {
@@ -134,22 +145,53 @@ export default function IncidentPage({ initialData, error: serverError }) {
 
   if (loading) {
     // Fallback image
-    const fallback = "https://guardianshot.blr1.cdn.digitaloceanspaces.com/eagleEye/event-type/1739334564445.png";
+    const fallback =
+      "https://guardianshot.blr1.cdn.digitaloceanspaces.com/eagleEye/event-type/1739334564445.png";
     // OG logic for loading state
-    const { ogImage, video, videoThumbnail } = getOgPreviewMedia(initialData?.attachments, fallback);
+    const { ogImage, video, videoThumbnail } = getOgPreviewMedia(
+      initialData?.attachments,
+      fallback
+    );
 
     return (
       <>
         <Head>
           <title>{initialData?.title || "Awaaz Eye Incident"}</title>
-          <meta property="og:title" content={initialData?.title || "Awaaz Eye Incident"} />
-          <meta property="og:description" content={initialData?.description || "Incident details and updates from Awaaz Eye."} />
+          <meta
+            property="og:title"
+            content={initialData?.title || "Awaaz Eye Incident"}
+          />
+          <meta
+            property="og:description"
+            content={
+              initialData?.description ||
+              "Incident details and updates from Awaaz Eye."
+            }
+          />
           <meta property="og:image" content={ogImage} />
-          <meta property="og:url" content={`https://aawaz-landingpage.onrender.com/${id}`} />
-          <meta property="og:type" content={video ? "video.other" : "article"} />
-          <meta name="twitter:card" content={video ? "player" : "summary_large_image"} />
-          <meta name="twitter:title" content={initialData?.title || "Awaaz Eye Incident"} />
-          <meta name="twitter:description" content={initialData?.description || "Incident details and updates from Awaaz Eye."} />
+          <meta
+            property="og:url"
+            content={`https://aawaz-landingpage.onrender.com/${id}`}
+          />
+          <meta
+            property="og:type"
+            content={video ? "video.other" : "article"}
+          />
+          <meta
+            name="twitter:card"
+            content={video ? "player" : "summary_large_image"}
+          />
+          <meta
+            name="twitter:title"
+            content={initialData?.title || "Awaaz Eye Incident"}
+          />
+          <meta
+            name="twitter:description"
+            content={
+              initialData?.description ||
+              "Incident details and updates from Awaaz Eye."
+            }
+          />
           <meta name="twitter:image" content={ogImage} />
           {video && (
             <>
@@ -211,23 +253,50 @@ export default function IncidentPage({ initialData, error: serverError }) {
     url: `https://news.awaazeye.com/${id}`,
     siteName: "Awaaz Eye",
   });
-  
-  const fallback = "https://guardianshot.blr1.cdn.digitaloceanspaces.com/eagleEye/event-type/1739334564445.png";
-  const { ogImage, video, videoThumbnail } = getOgPreviewMedia(initialData?.attachments, fallback);
 
+  const fallback =
+    "https://guardianshot.blr1.cdn.digitaloceanspaces.com/eagleEye/event-type/1739334564445.png";
+  const { ogImage, video, videoThumbnail } = getOgPreviewMedia(
+    initialData?.attachments,
+    fallback
+  );
 
   return (
     <>
       <Head>
         <title>{initialData?.title || "Awaaz Eye Incident"}</title>
-        <meta property="og:title" content={initialData?.title || "Awaaz Eye Incident"} />
-        <meta property="og:description" content={initialData?.description || "Incident details and updates from Awaaz Eye."} />
+        <meta
+          property="og:title"
+          content={initialData?.title || "Awaaz Eye Incident"}
+        />
+        <meta
+          property="og:description"
+          content={
+            initialData?.description ||
+            "Incident details and updates from Awaaz Eye."
+          }
+        />
         <meta property="og:image" content={ogImage} />
-        <meta property="og:url" content={`https://aawaz-landingpage.onrender.com/${id}`} />
+        <meta
+          property="og:url"
+          content={`https://aawaz-landingpage.onrender.com/${id}`}
+        />
         <meta property="og:type" content={video ? "video.other" : "article"} />
-        <meta name="twitter:card" content={video ? "player" : "summary_large_image"} />
-        <meta name="twitter:title" content={initialData?.title || "Awaaz Eye Incident"} />
-        <meta name="twitter:description" content={initialData?.description || "Incident details and updates from Awaaz Eye."} />
+        <meta
+          name="twitter:card"
+          content={video ? "player" : "summary_large_image"}
+        />
+        <meta
+          name="twitter:title"
+          content={initialData?.title || "Awaaz Eye Incident"}
+        />
+        <meta
+          name="twitter:description"
+          content={
+            initialData?.description ||
+            "Incident details and updates from Awaaz Eye."
+          }
+        />
         <meta name="twitter:image" content={ogImage} />
         {video && (
           <>
@@ -241,17 +310,25 @@ export default function IncidentPage({ initialData, error: serverError }) {
 
       <NextSeo
         title={initialData?.title || "Awaaz Eye Incident"}
-        description={initialData?.description || "Incident details and updates from Awaaz Eye."}
+        description={
+          initialData?.description ||
+          "Incident details and updates from Awaaz Eye."
+        }
         canonical={`https://news.awaazeye.com/${id}`}
         openGraph={{
           type: hasVideo ? "video.other" : "article",
           url: `https://news.awaazeye.com/${id}`,
           title: initialData?.title || "Awaaz Eye Incident",
-          description: initialData?.description || "Incident details and updates from Awaaz Eye.",
+          description:
+            initialData?.description ||
+            "Incident details and updates from Awaaz Eye.",
           site_name: "Awaaz Eye",
           images: [
             {
-              url: firstImageItem || fallbackImage || "https://guardianshot.blr1.cdn.digitaloceanspaces.com/eagleEye/event-type/1739334564445.png",
+              url:
+                firstImageItem ||
+                fallbackImage ||
+                "https://guardianshot.blr1.cdn.digitaloceanspaces.com/eagleEye/event-type/1739334564445.png",
               width: 1200,
               height: 630,
               alt: initialData?.title || "Awaaz Eye Incident",
@@ -273,8 +350,13 @@ export default function IncidentPage({ initialData, error: serverError }) {
           cardType: hasVideo ? "player" : "summary_large_image",
           site: "@AwaazEye",
           title: initialData?.title || "Awaaz Eye Incident",
-          description: initialData?.description || "Incident details and updates from Awaaz Eye.",
-          image: firstImageItem || fallbackImage || "https://guardianshot.blr1.cdn.digitaloceanspaces.com/eagleEye/event-type/1739334564445.png",
+          description:
+            initialData?.description ||
+            "Incident details and updates from Awaaz Eye.",
+          image:
+            firstImageItem ||
+            fallbackImage ||
+            "https://guardianshot.blr1.cdn.digitaloceanspaces.com/eagleEye/event-type/1739334564445.png",
           ...(hasVideo && {
             player: firstVideoItem,
             playerWidth: 1280,
@@ -295,20 +377,17 @@ export default function IncidentPage({ initialData, error: serverError }) {
           <div className={styles.sliderBox}>
             <Swiper
               modules={[Pagination, Autoplay]}
-              pagination={{ clickable: true }}
+              pagination={false}
               spaceBetween={20}
               slidesPerView={1}
-              onSlideChange={(swiper) =>
+              onSwiper={(swiper) => (swiperRef.current = swiper)}
+              onSlideChange={(swiper) => {
+                const currentIndex = swiper.activeIndex;
+                setCurrentSlide(currentIndex);
                 setCurrentBg(
-                  incident?.attachments?.[swiper.activeIndex]?.attachment ||
-                    null
-                )
-              }
-              autoplay={{
-                delay: 3000,
-                disableOnInteraction: false,
+                  incident?.attachments?.[currentIndex]?.attachment || null
+                );
               }}
-              loop={true}
             >
               {incident.attachments?.map((item, idx) => (
                 <SwiperSlide key={idx}>
@@ -409,9 +488,15 @@ export default function IncidentPage({ initialData, error: serverError }) {
                           }}
                         >
                           {videoRefs.current[idx]?.muted ?? true ? (
-                            <MdVolumeOff color="white" size={18} />
+                            <MdOutlineVolumeOff
+                              className={styles.volumeIcon}
+                              color="white"
+                            />
                           ) : (
-                            <MdVolumeUp color="white" size={18} />
+                            <MdOutlineVolumeUp
+                              className={styles.volumeIcon}
+                              color="white"
+                            />
                           )}
                         </button>
                       </div>
@@ -426,58 +511,111 @@ export default function IncidentPage({ initialData, error: serverError }) {
                 </SwiperSlide>
               ))}
             </Swiper>
-            <div className={styles.sliderOverlay}></div>
+          </div>
+          <div className={styles.customDots}>
+            {incident.attachments?.map((_, idx) => (
+              <span
+                key={idx}
+                className={`${styles.dotCustom} ${
+                  currentSlide === idx ? styles.activeDot : ""
+                }`}
+                onClick={() => swiperRef.current?.slideTo(idx)}
+              />
+            ))}
           </div>
 
           {/* Meta info */}
-          <div className={styles.metaRow}>
-            {incident?.distance && (
-              <>
-                <span>{incident?.distance}</span>
-                <span className={styles.dot}>•</span>
-              </>
-            )}
-            {incident?.eventTime && (
-              <>
-                <span>
-                  {incident?.eventTime
-                    ? new Date(incident.eventTime).toLocaleString("en-US", {
-                        month: "short",
-                        day: "numeric",
-                      })
-                    : ""}
-                </span>
-                <span className={styles.dot}>•</span>
-                {/* Time ago */}
-                <span>
-                  {incident?.eventTime
-                    ? getTimeAgo(new Date(incident.eventTime)) + " ago"
-                    : ""}
-                </span>
-              </>
-            )}
-          </div>
-          <span className={styles.notified}>
-            {incident?.notifiedUserCount ? incident?.notifiedUserCount : 0}{" "}
-            Notified
-          </span>
 
           {/* Title & Description */}
           <div>
-            <div className={styles.titleRow}>
+            <div
+              className={styles.titleRow}
+              style={{
+                display: "-webkit-box",
+                WebkitLineClamp: showFullTitle ? "unset" : 3,
+                WebkitBoxOrient: "vertical",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: showFullTitle ? "normal" : "unset",
+              }}
+            >
               {incident?.title ? incident?.title : "No Title"}
+              {incident?.title &&
+                incident.title.split(" ").length > 6 &&
+                !showFullTitle && (
+                  <span
+                    className={styles.showMore}
+                    onClick={() => setShowFullTitle(true)}
+                    style={{
+                      color: "#00e676",
+                      cursor: "pointer",
+                      marginLeft: 8,
+                    }}
+                  >
+                    ...show more
+                  </span>
+                )}
+              {showFullTitle && (
+                <span
+                  className={styles.showMore}
+                  onClick={() => setShowFullTitle(false)}
+                  style={{ color: "#00e676", cursor: "pointer", marginLeft: 8 }}
+                >
+                  show less
+                </span>
+              )}
             </div>
-            <div className={styles.descRow}>
+            <div className={styles.metaRow}>
+              {incident?.distance && (
+                <>
+                  <span>{incident?.distance}</span>
+                  <span className={styles.dot}>•</span>
+                </>
+              )}
+              {incident?.eventTime && (
+                <>
+                  <span>
+                    {incident?.eventTime
+                      ? new Date(incident.eventTime).toLocaleString("en-US", {
+                          month: "short",
+                          day: "numeric",
+                        })
+                      : ""}
+                  </span>
+                  <span className={styles.dot}>•</span>
+                  {/* Time ago */}
+                  <span>
+                    {incident?.eventTime
+                      ? getTimeAgo(new Date(incident.eventTime)) + " ago"
+                      : ""}
+                  </span>
+                  <span className={styles.notified}>
+                    {incident?.notifiedUserCount
+                      ? incident?.notifiedUserCount
+                      : 0}{" "}
+                    Notified
+                  </span>
+                </>
+              )}
+            </div>
+            <div className={styles.descRow} style={{
+              display: '-webkit-box',
+              WebkitLineClamp: showFullTitle ? 'unset' : 3,
+              WebkitBoxOrient: 'vertical',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: showFullTitle ? 'normal' : 'unset',
+            }}>
               {incident?.description ? incident?.description : "No Description"}
             </div>
           </div>
 
           <div className={styles.incidentActions}>
-            <Image
+            {/* <Image
               src={LocationImage}
               className={styles.actionIconImage}
               alt="location"
-            />
+            /> */}
             <div className={styles.actionIcon}>
               <Image src={FireImage} alt="reaction" />
             </div>
@@ -540,9 +678,15 @@ export default function IncidentPage({ initialData, error: serverError }) {
                     }}
                   >
                     {fullscreenMedia.muted ? (
-                      <MdVolumeOff color="white" size={22} />
+                      <MdOutlineVolumeOff
+                        className={styles.volumeIcon}
+                        color="white"
+                      />
                     ) : (
-                      <MdVolumeUp color="white" size={22} />
+                      <MdOutlineVolumeUp
+                        className={styles.volumeIcon}
+                        color="white"
+                      />
                     )}
                   </button>
                 )}
@@ -569,7 +713,7 @@ export default function IncidentPage({ initialData, error: serverError }) {
                           className={styles.playIcon}
                           onClick={() => handlePlayClick(item)}
                         >
-                          <FaPlay size={12} color="#FFFFFF" />
+                          <FaPlay size={11} color="#FFFFFF" />
                         </span>
                       </div>
                     )}{" "}
@@ -610,8 +754,30 @@ export default function IncidentPage({ initialData, error: serverError }) {
                           : ""}
                       </span>
                     </div>
-                    <div className={styles.areaCardTitle}>{card.title}</div>
-                    <div className={styles.areaCardDesc}>
+                    <div
+                      className={styles.areaCardTitle}
+                      style={{
+                        display: "-webkit-box",
+                        WebkitLineClamp: showFullTitle ? "unset" : 2,
+                        WebkitBoxOrient: "vertical",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: showFullTitle ? "normal" : "unset",
+                      }}
+                    >
+                      {card.title}
+                    </div>
+                    <div
+                      className={styles.areaCardDesc}
+                      style={{
+                        display: "-webkit-box",
+                        WebkitLineClamp: showFullTitle ? "unset" : 3,
+                        WebkitBoxOrient: "vertical",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: showFullTitle ? "normal" : "unset",
+                      }}
+                    >
                       {card.description}
                     </div>
                   </div>
