@@ -93,7 +93,7 @@ function getOgPreviewMedia(attachments, fallback) {
 }
 
 export default function IncidentPage({ initialData, error: serverError }) {
-  console.log("Initial Data:", initialData)
+  // console.log("Initial Data:", initialData)
   const router = useRouter();
   const { id } = router.query;
 
