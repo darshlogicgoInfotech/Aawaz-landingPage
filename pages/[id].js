@@ -540,7 +540,7 @@ export default function IncidentPage({ initialData, error: serverError }) {
               }}
             >
               {incident?.title ? incident?.title : "No Title"}
-              {incident?.title &&
+              {/* {incident?.title &&
                 incident.title.split(" ").length > 6 &&
                 !showFullTitle && (
                   <span
@@ -554,7 +554,7 @@ export default function IncidentPage({ initialData, error: serverError }) {
                   >
                     ...show more
                   </span>
-                )}
+                )} */}
               {showFullTitle && (
                 <span
                   className={styles.showMore}
